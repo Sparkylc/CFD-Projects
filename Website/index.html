@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Project Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <script src="https://kit.fontawesome.com/718817c50a.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="header">
+        <div class="container">
+            <nav>
+                <img src="img/logo.png" class="logo">
+                <ul id="sidemenu">
+                    <li><a href="#header">Home</a></li>
+                    <li><a href="#project-summary">My Work</a></li>
+                    <li><a href="#project-updates">Projects</a></li>
+                    <li><a href="#projects">Project Updates</a></li>
+                    <li><a href="#contact-section">Contact</a></li>
+                    <i class="fa-solid fa-xmark" onclick="closemenu()"></i>
+                </ul>
+                <i class="fa-solid fa-bars" onclick="openmenu()"></i>
+            </nav>
+            <div class="header-text">
+                <p>My Projects</p>
+                <h1>Hi, I'm <span>Lukas</span> <br>Campbell</h1>
+            </div>
+        </div>
+    </div>
+    <!---------Project Summary Section----------->
+
+    <div id="project-summary">
+        <div class="container">
+            <div class="row">
+                <div class="project-summary-image-col">
+                    <img src="img/project-summary.png">
+                </div>
+                <div class="project-summary-text-col">
+                    <h1 class="sub-title">What have I done?</h1>
+                    <p>apsiudhapiduhpiushdapidahpsidhapida</p>
+
+
+                    <div class="tab-titles">
+                        <p class="tab-links active-link" onclick="opentab('math')">Math</p>
+                        <p class="tab-links" onclick="opentab('cs')">CS</p>
+                        <p class="tab-links" onclick="opentab('blender')">Blender</p>
+                    </div>
+                    <div class="tab-contents active-tab" id="math">
+                        <ul>
+                            <li><span>Multivariable Calculus Project 1</span><br>The design, development, and optimization of a teacup ride under realistic constraints</li>
+                            <li><span>Multivariable Calculus Project 2</span><br>This</li>
+                            <li><span>Multivariable Calculus Project 3</span><br>This</li>
+                        </ul>
+                    </div>
+                    <div class="tab-contents" id="cs">
+                        <ul>
+                            <li><span>CFD Project</span><br>This</li>
+                        </ul>
+                    </div>
+                    <div class="tab-contents" id="blender">
+                        <ul>
+                            <li><span>Blender Challenge</span><br>This</li>
+                        </ul>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-------------------------------Specific Projects-------------------------------------->
+
+<div id="project-updates">
+    <div class="container">
+        <h1 class="sub-title">Project Updates</h1>
+        <div class="project-updates-list">
+            <div>
+                <i class="fa-solid fa-calculator"></i>
+                <h2>07.12.2023</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
+                <a href="#">Learn more</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-calculator"></i>
+                <h2>1.12.2023</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
+                <a href="#">Learn more</a>
+            </div>
+            <div>
+                <i class="fa-solid fa-cube"></i>
+                <h2>05.11.2023</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
+                <a href="#">Learn more</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------------------------Project Updates------------------------------------------------------>
+
+<div id="projects">
+    <div class="container">
+        <h1 class="sub-title">Past Projects</h1>
+        <div class="project-list">
+            <div class="project">
+                <img src="img/project-summary.png">
+                <div class="layer">
+                    <h3>Multivariable Calculus Project 1</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <a href="#"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+            <div class="project">
+                <img src="img/project-summary.png">
+                <div class="layer">
+                    <h3>Multivariable Calculus Project 2</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <a href="#"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+            <div class="project">
+                <img src="img/project-summary.png">
+                <div class="layer">
+                    <h3>Multivariable Calculus Project 3</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <a href="#"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+        </div>
+        <a href="#" class="btn">See more</a>
+    </div>
+</div>
+
+<!------------------------------------------Contact Section------------------------------------------------------->
+<div id="contact-section">
+    <div class="container">
+        <div class="row">
+            <div class="contact-socials-column">
+                <h1 class="sub-title">Contact Me</h1>
+                    <p><i class="fa-solid fa-paper-plane"></i> lukas.campbell@me.com</p>
+                    <p><i class="fa-solid fa-phone"></i> +41 79 816 18 00</p>
+                <div class="social-icons">
+                    <a href="https://www.youtube.com/@sparkylc2402/videos"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="https://www.linkedin.com/in/lukas-james-campbell/"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://www.instagram.com/sparkylc2/"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://discordapp.com/users/480651720721170434"><i class="fa-brands fa-discord"></i></a>
+                </div>
+                <a href="media/Lukas Campbell CV.pdf" download class="btn btn2">Download CV</a>
+            </div>
+            <div class="contact-form-column">
+                <form name="submit-to-google-sheet">
+                    <input type="text" name="Name" placeholder="Your Name" required>
+                    <input type="email" name="Email" placeholder="Your Email" required>
+                    <textarea name="Message" rows="6" placeholder="Any questions?"></textarea>
+                    <a href=""><button type="submit" class="btn btn2">Submit</button></a>
+                </form>
+                <span id="msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-message">
+        <p>Mr.G is a GGOOOOATTTT <i class="fa-solid fa-fire"></i></p>
+    </div>
+</div>
+<!---------------------------------The Javascript for the tab switching in the first section-->
+    <script>
+        var tablinks = document.getElementsByClassName("tab-links");
+        var tabcontents = document.getElementsByClassName("tab-contents");
+
+        function opentab(tabname){
+            for (tablink of tablinks){
+                tablink.classList.remove("active-link");
+            }
+            for (tabcontent of tabcontents){
+                tabcontent.classList.remove("active-tab");
+            }
+            event.currentTarget.classList.add("active-link");
+            document.getElementById(tabname).classList.add("active-tab");
+        }
+    </script>
+    <script>
+
+
+        var sidemenu = document.getElementById("sidemenu");
+        
+
+        function openmenu(){
+            sidemenu.style.right = "0";
+        }
+
+        function  closemenu(){
+            sidemenu.style.right = "-200px";
+        }
+    </script>
+    
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzzTWusi8S6-LknK0__3-youQiGvzc6WO0Y6i_F_1VsE6XX4HRbzJmKjpbbN1-wswNT8Q/exec'
+    const form = document.forms['submit-to-google-sheet']
+    const msg = document.getElementById("msg")
+  
+    form.addEventListener('submit', e => {
+      e.preventDefault()
+      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => {
+            msg.innerHTML = "Thanks for the question! I might read it, or I might not, who knows?"
+            setTimeout(function(){
+                msg.innerHTML = ""
+            },5000)
+            form.reset()
+        })
+        .catch(error => console.error('Error!', error.message))
+    })
+  </script>
+</body>
+</html>
