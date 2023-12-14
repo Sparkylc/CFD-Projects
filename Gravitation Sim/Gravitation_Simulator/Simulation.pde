@@ -2,7 +2,7 @@ class Simulation {
   ArrayList<Body> bodies; //creates an arrayList with all of the body objects
   final float dt = 0.01; //sets the timestep between each velocity and acceleration calculation
   double G = 1; //Gravitational Constant
-  double min = 0.01; //minimum distance between any two particles
+  float  minimum = 0.01; //minimum distance between any two particles
   
   //n is the number of bodies that will be simulated
   
@@ -45,7 +45,7 @@ class Simulation {
        float directionVectorSquaredMagnitude = directionVector.magSq();
        
        //finds the resulting acceleration vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
-       PVector newAccelerationVector = PVector.mult(directionVector, G*secondaryBodyMass / (max(directionVectorMagnitude.sq(3), minimum)));
+       PVector newAccelerationVector = PVector.mult(directionVector, secondaryBodyMass / directionVectorMagnitude*directionVectorMagnitude*directionVectorMagnitude); //add minimum function
        
        //adds this acceleration onto the bodies current acceleration
        bodies.get(primaryBody).acceleration.add(newAccelerationVector);
@@ -56,7 +56,16 @@ class Simulation {
    //updates each body in the bodies arraylist with the aformentioned calculations
    for(int body = 0; body < bodies.size(); body++){
        //uses the updatebody function in the body class
-       bodies.get(body).updateBody;
-   }  
-   
+       bodies.get(body).updateBody();
+   }
+  }
+   //displays object
+   void display() {
+     stroke(255);
+     strokeWeight(2);
+     fill(127);
+     for (int body = 0; body < bodies.size(); body++){
+     ellipse(bodies.get(body).position.x, bodies.get(body).position.y, 48,48);
+     }
+  }
 }
