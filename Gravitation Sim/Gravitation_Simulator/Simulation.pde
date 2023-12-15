@@ -1,19 +1,22 @@
+
+
 class Simulation {
   ArrayList<Body> bodies; //creates an arrayList with all of the body objects
-  final float dt = 0.01; //sets the timestep between each velocity and acceleration calculation
   double G = 1; //Gravitational Constant
   float  minimum = 0.01; //minimum distance between any two particles
   
+  
+ 
+
   //n is the number of bodies that will be simulated
-  
-  
-  //randomly generates a bunch of particles with random positions, velocities, and
-  Simulation (Body body1, Body body2, Body body3) {
-    bodies.add(body1);
-    bodies.add(body2);
-    bodies.add(body3);
+  Simulation(){
+    bodies = new ArrayList<Body>();
   }
   
+
+  void addNewBody(Body newBody){
+    bodies.add(newBody);
+  }
   
   void updateVectors(){
     
@@ -22,6 +25,9 @@ class Simulation {
      
      //the position of the body we are calculating the acceleration for
      PVector primaryBodyPosition = bodies.get(primaryBody).position;
+     
+      //gets radius of the primary body
+       float primaryBodyRadius = bodies.get(primaryBody).bodyRadius;
      
      //for every other body that isnt this first body, calculate the acceleration
      for (int secondaryBody = 0; secondaryBody < bodies.size(); secondaryBody++){
@@ -35,20 +41,24 @@ class Simulation {
        //finds mass of secondary body
        float secondaryBodyMass = bodies.get(secondaryBody).mass;
        
-       //finds the vector between the two bodies
-       PVector directionVector = PVector.sub(secondaryBodyPosition, primaryBodyPosition);
+       //finds radius of secondary body
+       float secondaryBodyRadius = bodies.get(secondaryBody).bodyRadius;
        
-       //finds the magnitude of the direction vector
+       //finds the unit direction vector between the two bodies
+       PVector directionVector = PVector.sub(secondaryBodyPosition, primaryBodyPosition).normalize();
+    
+       //finds the direction vectors magnitude
        float directionVectorMagnitude = directionVector.mag();
        
-       //finds the squared magnitude of the direction vector
-       float directionVectorSquaredMagnitude = directionVector.magSq();
+       //FIND FULL DISTANCE AND ALSO CHECK FOR IF UNITS ARE IN "METERS" FOR THIS PART OR IF IT CALCULATES VELOCITY, ETC USING PIXELS/CONVERT YOUR PIXEL DISTANCE TO METER DISTANCE AND THEN BACK TO PIXEL AFTER
        
+        
        //finds the resulting acceleration vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
-       PVector newAccelerationVector = PVector.mult(directionVector, secondaryBodyMass / directionVectorMagnitude*directionVectorMagnitude*directionVectorMagnitude); //add minimum function
+       PVector accelerationVector = PVector.mult(directionVector, secondaryBodyMass/directionVectorMagnitude*directionVectorMagnitude);
+       
        
        //adds this acceleration onto the bodies current acceleration
-       bodies.get(primaryBody).acceleration.add(newAccelerationVector);
+       bodies.get(primaryBody).acceleration.add(accelerationVector);
       }
     }  
   }
@@ -58,6 +68,8 @@ class Simulation {
        //uses the updatebody function in the body class
        bodies.get(body).updateBody();
    }
+   
+   
   }
    //displays object
    void display() {
@@ -65,7 +77,8 @@ class Simulation {
      strokeWeight(2);
      fill(127);
      for (int body = 0; body < bodies.size(); body++){
-     ellipse(bodies.get(body).position.x, bodies.get(body).position.y, 48,48);
+     ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).bodyRadius, bodies.get(body).bodyRadius);
+     System.out.println(bodies.get(body).bodyRadius);
      }
   }
 }
