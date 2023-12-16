@@ -12,6 +12,10 @@ class Simulation {
   Simulation(){
     bodies = new ArrayList<Body>();
   }
+
+  ArrayList<Body> getBodyArray(){
+    return bodies;
+  }
   
 
   void addNewBody(Body newBody){
@@ -29,7 +33,7 @@ class Simulation {
      float primaryBodyMass = bodies.get(primaryBody).mass;
      
       //gets radius of the primary body
-       float primaryBodyRadius = bodies.get(primaryBody).bodyRadius;
+       float primaryBodyRadius = bodies.get(primaryBody).radius;
      
      //for every other body that isnt this first body, calculate the acceleration
      for (int secondaryBody = primaryBody+1; secondaryBody < bodies.size(); secondaryBody++){
@@ -44,7 +48,7 @@ class Simulation {
        float secondaryBodyMass = bodies.get(secondaryBody).mass;
        
        //finds radius of secondary body
-       float secondaryBodyRadius = bodies.get(secondaryBody).bodyRadius;
+       float secondaryBodyRadius = bodies.get(secondaryBody).radius;
        
        //finds the unit direction vector between the two bodies
        PVector directionVector = PVector.sub(secondaryBodyPosition, primaryBodyPosition).normalize();
@@ -55,7 +59,7 @@ class Simulation {
        
         
        //finds the resulting force vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
-       PVector accelerationVector = PVector.mult(directionVector, 1/(directionVectorMagnitude*directionVectorMagnitude));
+       PVector accelerationVector = PVector.mult(directionVector, max(1/(directionVectorMagnitude*directionVectorMagnitude),0.1));
        
        
        //adds this acceleration onto the bodies current acceleration
@@ -80,7 +84,7 @@ class Simulation {
      strokeWeight(2);
      fill(127);
      for (int body = 0; body < bodies.size(); body++){
-     ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).bodyRadius, bodies.get(body).bodyRadius);
+     ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).radius, bodies.get(body).radius);
      }
   }
 }

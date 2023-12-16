@@ -8,47 +8,235 @@ class Body {
   PVector acceleration = new PVector();
 
 
+  int count = 0;
+
  
   //input the bodies radius in meters
-  float bodyRadiusMeters;
   
   //convers the radius from meters to pixels given the value of meters per pixel
-  float bodyRadius;
+  float radius;
  
   //creates a float for mass of body
   float mass;
  
  
  //5 parameter constructor
-  Body(PVector position, PVector velocity, PVector acceleration, float mass, float bodyRadiusMeters) {
+  Body(PVector position, PVector acceleration, float mass, float radius) {
      this.position = position;
-     this.velocity = velocity;
      this.acceleration = acceleration;
      this.mass = mass;
-     this.bodyRadius = bodyRadiusMeters/metersPerPixel;
+     this.radius = radius;
      this.previousPosition = position;
   }
   
   
   void updateBody() {
     
-      //finds the change in position of the body per frame
-      
-      PVector positionDelta = PVector.sub(PVector.add(PVector.sub(PVector.mult(position, 2),previousPosition),PVector.mult(acceleration, sq(dt))),position);
-      
+      //generate a velocity vector
+      velocity = PVector.sub(position, previousPosition);
 
       //this sets the current position to the old position 
       previousPosition = position;
-
-      //adds this change in position to the current position
-      position.add(positionDelta);
+    
+      //finds the change in position of the body per frams
+      position = PVector.add(position, PVector.add(velocity, PVector.mult(acceleration,sq(dt)))); 
+      
 
 
       //resets acceleration as to recalculate it for the next frame
       acceleration.mult(0);
+
+     
+      this.constrain();
+
+      this.collisionDetection(simulation.getBodyArray());
+
   }
+
+  void constrain() {
+      //multiplies each velocity by this to dampen wall impacts
+      //checks if body is  out of bounds and simply flips the direction of velocity
+      if(this.position.x < 0 || this.position.x > screenWidth){
+        velocity.x = -1*velocity.x;
+         
+      }
+      if(this.position.y < 0 || this.position.y > screenHeight){
+        velocity.y = -1*velocity.y;
+         
+      }
+  }
+
+  //just creates a list with the bodies the current body is in contact with, then updates those bodies;
+  void collisionDetection(ArrayList<Body> bodies){
+    ArrayList<Body> collidedBodies = new ArrayList();
+
+    //just checks if the current body has collided with the other body, and if that other body is not the current body
+    for(int currentBody = 0; currentBody < bodies.size(); currentBody++){
+      if(bodies.get(currentBody) != this && hasCollided(bodies.get(currentBody))){
+        collidedBodies.add(bodies.get(currentBody));
+        
+    }
+   }
+    //performs the collision response with every object in the list
+   for (int currentBody = 0; currentBody < collidedBodies.size(); currentBody++){
+    this.collisionResponse(collidedBodies.get(currentBody));
+   } 
+  } 
   
+  //checks if the current object is within the minimum distance of the other object, and performs a correction so that the body doesnt intersect itself
+  boolean hasCollided(Body body){
+    PVector distanceVector = PVector.sub(body.position, this.position);
+    if (distanceVector.mag() < body.radius){
+      float distanceCorrection = (body.radius-distanceVector.mag())/2.0;
+      PVector d = distanceVector.copy();
+      PVector correctionVector = d.normalize().mult(distanceCorrection);
+      body.position.add(correctionVector);
+      position.sub(correctionVector);
+      return true;
+    }
+    return false;
+  }
 
 
 
-}
+  void collisionResponse(Body body) {
+
+          /*
+          float distanceCorrection = (minimumDistance-distanceVectorMagnitude)/300;
+          PVector d = distanceVector.copy();
+          PVector correctionVector = d.normalize().mult(distanceCorrection);
+          body.position.add(correctionVector);
+          position.sub(correctionVector);
+
+          
+            /* First you find the normal vector, the vector that crosses through both centers, and the vector tangential to their point of impact,
+            ie the vector orthogonal to the line between the two centers of the bodies:
+
+              n is the normal vector
+              pos2 is the position of the second body
+              pos1 is the position of the current body
+                      n = pos2 - pos1
+
+
+            then you find the unit normal vector:
+            
+              un is the unit normal vector
+              n is the normal vector
+              ||n|| is the magnitude of the normal vector 
+                        un = n/||n||
+            
+            to find the unit tangent vector:
+
+              ut is the unit tangent vector
+              un_y is the y component of the unit normal vector
+              un_x is the x component of the unit normal vector
+                       ut = <-un_y,unx>
+            
+            then you project your velocity vector onto the tangent and normal vectors using a dot product to find the magnitude of the components of velocity of the object along
+            the normal and tangent lines
+
+              v_1n is the magnitude of the component of velocity in the normal direction for the first body
+              v_1t is the magnitude of the component of velocity in the tangential direction for the first body
+              v_2n is the magnitude of the component of velocity in the normal direction for the secondary body
+              v_2t is the magnitude of the component of velocity in the tangential direction for the secondary body
+              un is the unit normal vector
+              ut is the unit tangent vector
+              v_1 is the current velocity vector for the first body
+              v_2 is the current velocity vector for the second body
+
+                            v_1n= un (dot) v_1
+                            v_1t = ut (dot) v_1
+                            v_2n = un (dot) v_2
+                            v_2t = ut (dot) v_2
+
+            then using the laws of conservation of energy, as well as the laws of momentum, ie
+                      0.5*m_1*(v_1)^2 + 0.5*m_2*(v_2)^2 = 0.5*m_1(v'_1)^2 + 0.5m_1(v'_2)^2
+                                                   and
+                                m_1*v_1 + m_2*v_2 = m_1*v'_1 + m_2*v'_2
+
+            (as the collision is elastic so both kinetic energy and momentum are conserved)
+            you can find the following equations for the new magnitudes of the normal and tangential components of the two velocities:
+
+              v'_1n is the magnitude of the normal component of the new velocity for the first body
+              v'_2n is the magnitude of the normal component of the new velocity for the second body
+              v'_1t is the magnitude of the tangential component of the new velocity for the first body
+              v'_2t is the magnitude of the tangential component of the new velocity for the second body
+              m_1 is the mass of the first body
+              m_2 is the mass of the secondary body
+
+                            v'_1n = (v_1n(m_1-m_2)+2m_2*v_2n)/(m_1+m_2) 
+                            v'_2n = (v_2n(m_2-m_1)+2m_1*v_1n)/(m_1+m_2) 
+
+                            v'_1t = v_1t
+                            v'_2t = v_2t
+
+            finally from there convert the scalar normal and tangential velocities for both objects back into their respective vectors, and find the final velocity vectors 
+            by summing the new normal and tangential vectors
+              
+              vec(v'_1) is the new velocity vector for the first body
+              vec(v'_2) is the new velocity vector for the second body
+              vec(v'_1n) is the new normal velocity vector for the first body
+              vec(v'_2n) is the new normal velocity vector for the second body
+              vec(v'_1t) is the new tangent velocity vector for the first body
+              vec(v'_2t) is the new tangent velocity vector for the second body
+              v'_1n is the magnitude of the normal component of the new velocity for the first body
+              v'_2n is the magnitude of the normal component of the new velocity for the second body
+              v'_1t is the magnitude of the tangential component of the new velocity for the first body
+              v'_2t is the magnitude of the tangential component of the new velocity for the second body
+              un is the unit normal vector
+              ut is the unit tangent vector
+
+                                    vec(v'_1n) = (v'_1n)*(un)
+                                    vec(v'_2n) = (v'_2n)*(un)
+                                    vec(v'_1t) = (v'_1t)*(ut)
+                                    vec(v'_2t) = (v'_2t)*(ut)
+                                  vec(v'_1)=vec(v'_1n)+vec(v'_1t)
+                                  vec(v'_2)=vec(v'_2n)+vec(v'_2t)
+            
+            */
+            PVector secondaryBodyPosition = body.position;
+            PVector secondaryBodyVelocity = body.velocity;
+            float secondaryBodyMass = body.mass;
+
+            //finds the unit vector of the line that goes between the centers of bodies
+            PVector unitNormalVector = PVector.sub(secondaryBodyPosition, position).normalize();
+     
+            
+            //finds the unit vector tangent to both body at the point of collision
+            PVector unitTangentVector = new PVector(-1*unitNormalVector.y, unitNormalVector.x);
+
+            //finds the scalar values for the tangential and normal velocity of both body
+            float primaryBodyScalarTangentialVelocity = PVector.dot(unitTangentVector, this.velocity);
+            float primaryBodyScalarNormalVelocity = PVector.dot(unitNormalVector, this.velocity);
+
+            float secondaryBodyScalarTangentialVelocity = PVector.dot(unitTangentVector, secondaryBodyVelocity);
+            float secondaryBodyScalarNormalVelocity = PVector.dot(unitNormalVector, secondaryBodyVelocity);
+
+            //finds the new scalar values for the components of velocity along the nomral line
+            float newPrimaryBodyScalarNormalVelocity = (primaryBodyScalarNormalVelocity * (this.mass - secondaryBodyMass) + 2 * secondaryBodyMass * secondaryBodyScalarNormalVelocity) / (this.mass + secondaryBodyMass);
+            float newSecondaryBodyScalarNormalVelocity = (secondaryBodyScalarNormalVelocity * (secondaryBodyMass-this.mass) + 2 * this.mass * primaryBodyScalarNormalVelocity)/(this.mass + secondaryBodyMass);
+ 
+            PVector newPrimaryBodyNormalVelocityVector = PVector.mult(unitNormalVector, newPrimaryBodyScalarNormalVelocity);
+            PVector newSecondaryBodyNormalVelocityVector = PVector.mult(unitNormalVector, newSecondaryBodyScalarNormalVelocity);
+
+            PVector newPrimaryBodyTangentialVelocityVector = PVector.mult(unitTangentVector, primaryBodyScalarTangentialVelocity);
+            PVector newSecondaryBodyTangentialVelocityVector = PVector.mult(unitTangentVector, secondaryBodyScalarTangentialVelocity);
+
+            PVector newPrimaryBodyVelocityVector = PVector.add(newPrimaryBodyNormalVelocityVector,newPrimaryBodyTangentialVelocityVector);
+            PVector newSecondaryBodyVelocityVector = PVector.add(newSecondaryBodyNormalVelocityVector, newSecondaryBodyTangentialVelocityVector);
+            //System.out.println(velocity);
+            
+            this.velocity = newPrimaryBodyVelocityVector;
+            body.velocity = newSecondaryBodyVelocityVector;
+            //System.out.println(velocity);
+         
+        }
+        }
+
+
+
+
+
+
+
+
