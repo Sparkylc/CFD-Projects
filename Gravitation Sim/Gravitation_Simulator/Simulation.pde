@@ -54,7 +54,7 @@ class Simulation {
        
         
        //finds the resulting acceleration vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
-       PVector accelerationVector = PVector.mult(directionVector, secondaryBodyMass/directionVectorMagnitude*directionVectorMagnitude);
+       PVector accelerationVector = PVector.mult(directionVector, secondaryBodyMass/(directionVectorMagnitude*directionVectorMagnitude));
        
        
        //adds this acceleration onto the bodies current acceleration
