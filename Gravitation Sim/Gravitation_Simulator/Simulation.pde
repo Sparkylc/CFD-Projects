@@ -1,4 +1,4 @@
-
+ 
 
 class Simulation {
   ArrayList<Body> bodies; //creates an arrayList with all of the body objects
@@ -20,17 +20,19 @@ class Simulation {
   
   void updateVectors(){
     
-   //Selects each body and sums the accelerations of every other body around it to get net acceleration on the body
+   //Selects each body and sums the accelerations of every other body around it to get net acceleration on the body, calculates values both ways
    for (int primaryBody = 0; primaryBody < bodies.size(); primaryBody++){
      
      //the position of the body we are calculating the acceleration for
      PVector primaryBodyPosition = bodies.get(primaryBody).position;
+
+     float primaryBodyMass = bodies.get(primaryBody).mass;
      
       //gets radius of the primary body
        float primaryBodyRadius = bodies.get(primaryBody).bodyRadius;
      
      //for every other body that isnt this first body, calculate the acceleration
-     for (int secondaryBody = 0; secondaryBody < bodies.size(); secondaryBody++){
+     for (int secondaryBody = primaryBody+1; secondaryBody < bodies.size(); secondaryBody++){
        
        //just ensuring that the body doesnt select itself as a body to accelerate towards
        if(primaryBody != secondaryBody){  
@@ -50,15 +52,16 @@ class Simulation {
        //finds the direction vectors magnitude
        float directionVectorMagnitude = directionVector.mag();
        
-       //FIND FULL DISTANCE AND ALSO CHECK FOR IF UNITS ARE IN "METERS" FOR THIS PART OR IF IT CALCULATES VELOCITY, ETC USING PIXELS/CONVERT YOUR PIXEL DISTANCE TO METER DISTANCE AND THEN BACK TO PIXEL AFTER
        
         
-       //finds the resulting acceleration vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
-       PVector accelerationVector = PVector.mult(directionVector, secondaryBodyMass/(directionVectorMagnitude*directionVectorMagnitude));
+       //finds the resulting force vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
+       PVector accelerationVector = PVector.mult(directionVector, 1/(directionVectorMagnitude*directionVectorMagnitude));
        
        
        //adds this acceleration onto the bodies current acceleration
-       bodies.get(primaryBody).acceleration.add(accelerationVector);
+       bodies.get(primaryBody).acceleration.add(PVector.mult(accelerationVector,secondaryBodyMass)); //a1 = m2/r^2 
+
+       bodies.get(secondaryBody).acceleration.sub(PVector.mult(accelerationVector,primaryBodyMass));//a2 = m1/r^2
       }
     }  
   }
@@ -78,7 +81,6 @@ class Simulation {
      fill(127);
      for (int body = 0; body < bodies.size(); body++){
      ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).bodyRadius, bodies.get(body).bodyRadius);
-     System.out.println(bodies.get(body).bodyRadius);
      }
   }
 }
