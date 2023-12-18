@@ -109,8 +109,9 @@ class Body {
   //checks if the current object is within the minimum distance of the other object, and performs a correction so that the body doesnt intersect itself
   boolean hasCollided(Body body){
     PVector distanceVector = PVector.sub(body.position, this.position);
-    if (distanceVector.mag() < (body.radius + this.radius)/2){
-      float distanceCorrection = (body.radius-distanceVector.mag())/2;
+    if (distanceVector.mag() < (body.radius+this.radius)/2){
+      //if (distanceVector.mag() < (body.radius + this.radius)/2){
+      float distanceCorrection = ((body.radius+this.radius)/2-distanceVector.mag())/2;
       PVector d = distanceVector.copy();
       PVector correctionVector = d.normalize().mult(distanceCorrection);
       body.position.add(correctionVector);

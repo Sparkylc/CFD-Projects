@@ -34,7 +34,7 @@ void mousePressed(){
 
  void mouseReleased() {
   finalMousePosition = new PVector(mouseX, mouseY);
-  Body body = new Body(finalMousePosition, new PVector(0,0), 1500, random(25,100));
+  Body body = new Body(finalMousePosition, new PVector(0,0), 1500, random(50,100));
   body.initialVelocity(initialMousePosition, finalMousePosition);
   simulation.addNewBody(body);
   mousePressed = false;
