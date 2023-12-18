@@ -1,12 +1,8 @@
- 
-
-class Simulation {
+ class Simulation {
   ArrayList<Body> bodies; //creates an arrayList with all of the body objects
   double G = 1; //Gravitational Constant
   float  minimum = 0.01; //minimum distance between any two particles
   
-  
- 
 
   //n is the number of bodies that will be simulated
   Simulation(){
@@ -20,8 +16,11 @@ class Simulation {
 
   void addNewBody(Body newBody){
     bodies.add(newBody);
+
   }
   
+
+  //updates acceleration vectors
   void updateVectors(){
     
    //Selects each body and sums the accelerations of every other body around it to get net acceleration on the body, calculates values both ways
@@ -56,28 +55,27 @@ class Simulation {
        //finds the direction vectors magnitude
        float directionVectorMagnitude = directionVector.mag();
        
-       
-        
+
        //finds the resulting force vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
-       PVector accelerationVector = PVector.mult(directionVector, max(1/(directionVectorMagnitude*directionVectorMagnitude),0.1));
-       
+       PVector accelerationVector = PVector.mult(directionVector, 1/max(directionVectorMagnitude*directionVectorMagnitude,0.1));
        
        //adds this acceleration onto the bodies current acceleration
        bodies.get(primaryBody).acceleration.add(PVector.mult(accelerationVector,secondaryBodyMass)); //a1 = m2/r^2 
-
        bodies.get(secondaryBody).acceleration.sub(PVector.mult(accelerationVector,primaryBodyMass));//a2 = m1/r^2
       }
     }  
   }
-  
+}
+
+  void updateBodies(){
    //updates each body in the bodies arraylist with the aformentioned calculations
    for(int body = 0; body < bodies.size(); body++){
        //uses the updatebody function in the body class
        bodies.get(body).updateBody();
    }
-   
-   
   }
+  
+
    //displays object
    void display() {
      stroke(255);

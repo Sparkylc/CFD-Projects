@@ -6,6 +6,12 @@ class Body {
   PVector previousPosition = new PVector();
   PVector velocity = new PVector();
   PVector acceleration = new PVector();
+  
+
+  //creates an integrator object with this object as an input
+  Integrator objectIntegrator = new Integrator(this);
+
+  //creates a temp float for calculations;
 
 
   int count = 0;
@@ -26,29 +32,24 @@ class Body {
      this.acceleration = acceleration;
      this.mass = mass;
      this.radius = radius;
-     this.previousPosition = position;
   }
   
   
+  void initialVelocity(PVector initialMousePosition, PVector finalMousePosition){
+      //edge case so no division by 0
+      if(PVector.sub(initialMousePosition, finalMousePosition).mag()<0.01){
+          this.previousPosition = position;
+      } else {
+      float initialVelocity = PVector.sub(initialMousePosition, finalMousePosition).mag();
+      float scalingFactor = 1/sqrt(initialVelocity);
+      PVector unitDirectionVector = PVector.mult(PVector.sub(initialMousePosition, finalMousePosition).normalize(),scalingFactor);
+      this.previousPosition = PVector.sub(this.position, PVector.mult(unitDirectionVector,initialVelocity));
+      }
+  }
   void updateBody() {
-    
-      //generate a velocity vector
-      velocity = PVector.sub(position, previousPosition);
-
-      //this sets the current position to the old position 
-      previousPosition = position;
-    
-      //finds the change in position of the body per frams
-      position = PVector.add(position, PVector.add(velocity, PVector.mult(acceleration,sq(dt)))); 
-      
-
-
-      //resets acceleration as to recalculate it for the next frame
-      acceleration.mult(0);
-
-     
+      //sets the object integrator type
+      objectIntegrator.verletIntegrator();
       this.constrain();
-
       this.collisionDetection(simulation.getBodyArray());
 
   }
@@ -56,12 +57,34 @@ class Body {
   void constrain() {
       //multiplies each velocity by this to dampen wall impacts
       //checks if body is  out of bounds and simply flips the direction of velocity
+
       if(this.position.x < 0 || this.position.x > screenWidth){
-        velocity.x = -1*velocity.x;
+        float temp;
+        if(this.position.x < 0) {
+          temp = this.position.x;
+          this.position.x = previousPosition.x;
+          previousPosition.x = temp;
+        }
+        if(this.position.x > screenWidth) {
+          temp = this.position.x;
+          this.position.x = previousPosition.x;
+          previousPosition.x = temp;
+        }
+        
          
       }
       if(this.position.y < 0 || this.position.y > screenHeight){
-        velocity.y = -1*velocity.y;
+        float temp;
+        if(this.position.y < 0){
+          temp = this.position.y;
+          this.position.y = previousPosition.y;
+          previousPosition.y = temp;
+        }
+        if(this.position.y > screenHeight){
+          temp = this.position.y;
+          this.position.y = previousPosition.y;
+          previousPosition.y = temp;
+        }
          
       }
   }
@@ -86,12 +109,13 @@ class Body {
   //checks if the current object is within the minimum distance of the other object, and performs a correction so that the body doesnt intersect itself
   boolean hasCollided(Body body){
     PVector distanceVector = PVector.sub(body.position, this.position);
-    if (distanceVector.mag() < body.radius){
-      float distanceCorrection = (body.radius-distanceVector.mag())/2.0;
+    if (distanceVector.mag() < (body.radius + this.radius)/2){
+      float distanceCorrection = (body.radius-distanceVector.mag())/2;
       PVector d = distanceVector.copy();
       PVector correctionVector = d.normalize().mult(distanceCorrection);
       body.position.add(correctionVector);
       position.sub(correctionVector);
+
       return true;
     }
     return false;
@@ -101,12 +125,6 @@ class Body {
 
   void collisionResponse(Body body) {
 
-          /*
-          float distanceCorrection = (minimumDistance-distanceVectorMagnitude)/300;
-          PVector d = distanceVector.copy();
-          PVector correctionVector = d.normalize().mult(distanceCorrection);
-          body.position.add(correctionVector);
-          position.sub(correctionVector);
 
           
             /* First you find the normal vector, the vector that crosses through both centers, and the vector tangential to their point of impact,
@@ -205,14 +223,14 @@ class Body {
             //finds the unit vector tangent to both body at the point of collision
             PVector unitTangentVector = new PVector(-1*unitNormalVector.y, unitNormalVector.x);
 
-            //finds the scalar values for the tangential and normal velocity of both body
+            //finds the scalar values for the tangential and normal velocity of both bodies
             float primaryBodyScalarTangentialVelocity = PVector.dot(unitTangentVector, this.velocity);
             float primaryBodyScalarNormalVelocity = PVector.dot(unitNormalVector, this.velocity);
 
             float secondaryBodyScalarTangentialVelocity = PVector.dot(unitTangentVector, secondaryBodyVelocity);
             float secondaryBodyScalarNormalVelocity = PVector.dot(unitNormalVector, secondaryBodyVelocity);
 
-            //finds the new scalar values for the components of velocity along the nomral line
+            //finds the new scalar values for the components of velocity along the normal line
             float newPrimaryBodyScalarNormalVelocity = (primaryBodyScalarNormalVelocity * (this.mass - secondaryBodyMass) + 2 * secondaryBodyMass * secondaryBodyScalarNormalVelocity) / (this.mass + secondaryBodyMass);
             float newSecondaryBodyScalarNormalVelocity = (secondaryBodyScalarNormalVelocity * (secondaryBodyMass-this.mass) + 2 * this.mass * primaryBodyScalarNormalVelocity)/(this.mass + secondaryBodyMass);
  
@@ -226,8 +244,11 @@ class Body {
             PVector newSecondaryBodyVelocityVector = PVector.add(newSecondaryBodyNormalVelocityVector, newSecondaryBodyTangentialVelocityVector);
             //System.out.println(velocity);
             
-            this.velocity = newPrimaryBodyVelocityVector;
-            body.velocity = newSecondaryBodyVelocityVector;
+            this.velocity = PVector.mult(newPrimaryBodyVelocityVector,0.2);
+            body.velocity = PVector.mult(newSecondaryBodyVelocityVector,0.2);
+
+            
+
             //System.out.println(velocity);
          
         }

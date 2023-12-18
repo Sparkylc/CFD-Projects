@@ -8,6 +8,13 @@ float metersPerPixel = 1;
 
 //float dt = 1/(metersPerPixel*framesPerSecond);
 
+PVector initialMousePosition;
+PVector finalMousePosition;
+
+boolean mousePressed = false;
+boolean mouseReleased = false;
+
+
 float dt = 0.01;
 Simulation simulation = new Simulation();
 
@@ -17,13 +24,22 @@ void setup() {
 
 }
 
-void mouseClicked(){
+void mousePressed(){
   //creates a new object at the mouses current coordinaes
-  PVector pos = new PVector(mouseX, mouseY);
-   PVector vel = new PVector(30, 50);
-  PVector acc = new PVector(30, 50);
-  
-  simulation.addNewBody(new Body(pos, acc, 50,50));
+  initialMousePosition = new PVector(mouseX, mouseY);
+  mousePressed = true;
+  mouseReleased = false;
+
+}
+
+ void mouseReleased() {
+  finalMousePosition = new PVector(mouseX, mouseY);
+  Body body = new Body(finalMousePosition, new PVector(0,0), 1500, random(25,100));
+  body.initialVelocity(initialMousePosition, finalMousePosition);
+  simulation.addNewBody(body);
+  mousePressed = false;
+  mouseReleased = true;
+
 
 }
 
@@ -31,7 +47,14 @@ void draw() {
     background(0);
     simulation.display();
     simulation.updateVectors();
+    simulation.updateBodies();
+    PVector currentPosition = new PVector(mouseX, mouseY);
+    if (mousePressed == true && mouseReleased == false ){
+    
+      stroke(200);
 
+      line(initialMousePosition.x, initialMousePosition.y, mouseX, mouseY);
+    }
     
 
  }
