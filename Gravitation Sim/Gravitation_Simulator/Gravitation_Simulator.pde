@@ -25,7 +25,7 @@ float dt = 0.01;
 Simulation simulation = new Simulation();
 
 void setup() {
-  size(1720, 880, OPENGL);
+  size(1720, 880);
   frameRate(framesPerSecond);
   userInterface = new ControlP5(this);
   userInterfaceController = new UserInterface(userInterface);
