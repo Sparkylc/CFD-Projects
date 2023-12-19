@@ -85,4 +85,8 @@
      ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).radius, bodies.get(body).radius);
      }
   }
+
+  void resetSimulation(){
+    bodies.clear();
+  }
 }
