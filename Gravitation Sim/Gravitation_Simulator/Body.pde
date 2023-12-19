@@ -111,7 +111,7 @@ class Body {
     PVector distanceVector = PVector.sub(body.position, this.position);
     if (distanceVector.mag() < (body.radius+this.radius)/2){
       //if (distanceVector.mag() < (body.radius + this.radius)/2){
-      float distanceCorrection = ((body.radius+this.radius)/2-distanceVector.mag())/2;
+      float distanceCorrection = ((body.radius+this.radius)/2 - distanceVector.mag())/2;
       PVector d = distanceVector.copy();
       PVector correctionVector = d.normalize().mult(distanceCorrection);
       body.position.add(correctionVector);
@@ -245,8 +245,8 @@ class Body {
             PVector newSecondaryBodyVelocityVector = PVector.add(newSecondaryBodyNormalVelocityVector, newSecondaryBodyTangentialVelocityVector);
             //System.out.println(velocity);
             
-            this.velocity = PVector.mult(newPrimaryBodyVelocityVector,0.2);
-            body.velocity = PVector.mult(newSecondaryBodyVelocityVector,0.2);
+            this.velocity = newPrimaryBodyVelocityVector;
+            body.velocity = newSecondaryBodyVelocityVector;
 
             
 
