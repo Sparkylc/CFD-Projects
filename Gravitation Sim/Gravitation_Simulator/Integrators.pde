@@ -24,7 +24,7 @@ class Integrator {
     
       //finds the change in position of the body per frams
       body.position = PVector.add(body.position, PVector.add(body.velocity, PVector.mult(body.acceleration,sq(dt)))); 
-      
+        
       //resets acceleration as to recalculate it for the next frame
       body.acceleration.mult(0);
 

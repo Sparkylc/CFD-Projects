@@ -62,8 +62,11 @@
        //adds this acceleration onto the bodies current acceleration
        bodies.get(primaryBody).acceleration.add(PVector.mult(accelerationVector,secondaryBodyMass)); //a1 = m2/r^2 
        bodies.get(secondaryBody).acceleration.sub(PVector.mult(accelerationVector,primaryBodyMass));//a2 = m1/r^2
+       bodies.get(primaryBody).currentAccelerationVector = bodies.get(primaryBody).acceleration;
+       bodies.get(secondaryBody).currentAccelerationVector = bodies.get(secondaryBody).acceleration;
       }
-    }  
+    }
+  
   }
 }
 
@@ -89,4 +92,5 @@
   void resetSimulation(){
     bodies.clear();
   }
+
 }

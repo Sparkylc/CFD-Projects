@@ -6,6 +6,7 @@ class Body {
   PVector previousPosition = new PVector();
   PVector velocity = new PVector();
   PVector acceleration = new PVector();
+  PVector currentAccelerationVector = new PVector();
   
 
   //creates an integrator object with this object as an input
@@ -40,32 +41,53 @@ class Body {
       if(PVector.sub(initialMousePosition, finalMousePosition).mag()<0.01){
           this.previousPosition = position;
       } else {
+        //calculates the initial velocity of the body based on the distance between the initial mouse position and the final mouse position
       float initialVelocity = PVector.sub(initialMousePosition, finalMousePosition).mag();
+      //calculates the unit direction vector of the body based on the distance between the initial mouse position and the final mouse position
+      //and multiplies this by a scaling factor that is inversely proportional to the square root of the distance
       float scalingFactor = 1/sqrt(initialVelocity);
       PVector unitDirectionVector = PVector.mult(PVector.sub(initialMousePosition, finalMousePosition).normalize(),scalingFactor);
+
+      //sets the previous position of the body to the current position minus the unit direction vector multiplied by the initial velocity, 
+      //so that the body starts at the position of the mouse, and moves in the direction of the mouse
       this.previousPosition = PVector.sub(this.position, PVector.mult(unitDirectionVector,initialVelocity));
       }
   }
+
+  //updates the body's position, velocity, and acceleration
   void updateBody() {
       //sets the object integrator type
-      objectIntegrator.verletIntegrator();
-      this.constrain();
-      this.collisionDetection(simulation.getBodyArray());
+      //creates a copy of the acceleration vector for the user interface before it is reset for the next acceleration calculation
+      this.currentAccelerationVector = this.acceleration.copy();
 
+      //creates the velocity and acceleration vectors. this is done with the current frame information so that what is displayed is the current velocity
+      //and acceleration, not the velocity and acceleration from the next frame
+      userInterfaceController.velocityVectorArrow(this);
+      userInterfaceController.accelerationVectorArrow(this);
+
+      //updates the position, velocity, and acceleration vectors using the verlet integration mode
+      objectIntegrator.verletIntegrator();
+
+      //runs the constrain method for window bounds
+      this.constrain();
+
+      //runs the collision detection method on the entire body array
+      this.collisionDetection(simulation.getBodyArray());
+  
   }
 
   void constrain() {
       //multiplies each velocity by this to dampen wall impacts
       //checks if body is  out of bounds and simply flips the direction of velocity
 
-      if(this.position.x < 0 || this.position.x > screenWidth){
+      if(this.position.x - this.radius < 0 || this.position.x + this.radius > screenWidth){
         float temp;
-        if(this.position.x < 0) {
+        if(this.position.x - this.radius/2 < 0) {
           temp = this.position.x;
           this.position.x = previousPosition.x;
           previousPosition.x = temp;
         }
-        if(this.position.x > screenWidth) {
+        if(this.position.x + this.radius/2 > screenWidth) {
           temp = this.position.x;
           this.position.x = previousPosition.x;
           previousPosition.x = temp;
@@ -73,14 +95,14 @@ class Body {
         
          
       }
-      if(this.position.y < 0 || this.position.y > screenHeight){
+      if(this.position.y - this.radius/2 < 0 || this.position.y + this.radius/2 > screenHeight){
         float temp;
-        if(this.position.y < 0){
+        if(this.position.y - this.radius/2 < 0){
           temp = this.position.y;
           this.position.y = previousPosition.y;
           previousPosition.y = temp;
         }
-        if(this.position.y > screenHeight){
+        if(this.position.y + this.radius/2 > screenHeight){
           temp = this.position.y;
           this.position.y = previousPosition.y;
           previousPosition.y = temp;
