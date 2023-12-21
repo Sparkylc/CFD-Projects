@@ -27,8 +27,8 @@ class Integrator {
         
       //resets acceleration as to recalculate it for the next frame
       body.acceleration.mult(0);
-
     }
+
 } 
 
 

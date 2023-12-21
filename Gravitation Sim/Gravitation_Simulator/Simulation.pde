@@ -2,7 +2,7 @@
   ArrayList<Body> bodies; //creates an arrayList with all of the body objects
   double G = 1; //Gravitational Constant
   float  minimum = 0.01; //minimum distance between any two particles
-  
+  float totalEnergy = 0; //total energy of the system
 
   //n is the number of bodies that will be simulated
   Simulation(){
@@ -60,8 +60,9 @@
        PVector accelerationVector = PVector.mult(directionVector, 1/max(directionVectorMagnitude*directionVectorMagnitude,0.1));
        
        //adds this acceleration onto the bodies current acceleration
-       bodies.get(primaryBody).acceleration.add(PVector.mult(accelerationVector,secondaryBodyMass)); //a1 = m2/r^2 
-       bodies.get(secondaryBody).acceleration.sub(PVector.mult(accelerationVector,primaryBodyMass));//a2 = m1/r^2
+       bodies.get(primaryBody).acceleration.add(PVector.mult(PVector.mult(accelerationVector,secondaryBodyMass),gravitationalScalingCoefficient)); //a1 = m2/r^2 
+       bodies.get(secondaryBody).acceleration.sub(PVector.mult(PVector.mult(accelerationVector,primaryBodyMass), gravitationalScalingCoefficient));//a2 = m1/r^2
+       
        bodies.get(primaryBody).currentAccelerationVector = bodies.get(primaryBody).acceleration;
        bodies.get(secondaryBody).currentAccelerationVector = bodies.get(secondaryBody).acceleration;
       }
@@ -74,23 +75,35 @@
    //updates each body in the bodies arraylist with the aformentioned calculations
    for(int body = 0; body < bodies.size(); body++){
        //uses the updatebody function in the body class
+    
        bodies.get(body).updateBody();
+       
    }
   }
+
+  
   
 
    //displays object
    void display() {
-     stroke(255);
-     strokeWeight(2);
-     fill(127);
+    
+     stroke(0);
+     fill(255);
      for (int body = 0; body < bodies.size(); body++){
-     ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).radius, bodies.get(body).radius);
+        float strokeWeight = max(min(bodies.get(body).radius*5/100,7),4);
+             strokeWeight(strokeWeight);
+      //ELLIPSE USEs DIAMETER AS INPUT NOT RADIUS
+      ellipse(bodies.get(body).position.x, bodies.get(body).position.y, bodies.get(body).radius-strokeWeight, bodies.get(body).radius-strokeWeight);
      }
+    
+
   }
 
   void resetSimulation(){
     bodies.clear();
+    panX = 0;
+    panY = 0;
+    zoom = 1;
   }
 
 }
