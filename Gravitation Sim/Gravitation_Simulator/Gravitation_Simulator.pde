@@ -9,8 +9,6 @@ float metersPerPixel = 1;
 int screenWidth = 1920;
 int screenHeight = 1080; 
 
-int paddingX = 50;
-int paddingY = 50;
 
 
 
@@ -45,8 +43,7 @@ float gravitationalScalingCoefficient = 25;
 float dt = 0.001;
 Simulation simulation = new Simulation();
 
-PImage bg;
-// Declare the main DashedLines object
+
 
 void setup() {
     offset = new PVector(width / 2, height / 2);
@@ -54,11 +51,69 @@ void setup() {
     frameRate(framesPerSecond);
     userInterface = new ControlP5(this);
     userInterfaceController = new UserInterface(userInterface);
-    bg= loadImage("output.png");
-    bg.resize(screenWidth, screenHeight);
+}
+
+void draw() {
+
+background(16, 18, 19);
+noStroke();
+userInterfaceController.drawGrid();
+// Apply zoom and pan transformations
+
+
+    if(userInterface.getController("Lock View to Center of Mass").getValue() == 1) {
+        this.lockToCenterOfMass();
+        translate(width/2, height/2);
+        scale(zoom);
+        translate(-width/2, -height/2);
+        translate(lockedPanX, lockedPanY);
+        panX = lockedPanX;
+        panY = lockedPanY;
+    } else{
+        scale(zoom);
+        translate(panX, panY);
+    }
+
+
+
+
+
+
+    colorMode(RGB, 255);
+    hint(ENABLE_STROKE_PURE);
+
     
+    
+    simulation.display();
+    simulation.updateVectors();
+    userInterfaceController.centerOfMass(simulation.getBodyArray());
+    simulation.updateBodies();
+    
+    
+    if (mousePressed == true && mouseReleased == false &&  userInterface.getController("Fixed Body").getValue() == 0) {
+        //adjusts current mouse position based on panning amount
+        
+        PVector currentMousePosition = getMouseWorldCoordinates();
+        float worldMouseX = (mouseX / zoom) - panX;
+        float worldMouseY = (mouseY / zoom) - panY;
+
+        
+        stroke(0,0,0);
+        strokeWeight(12.5);
+        line(initialMousePosition.x, initialMousePosition.y, currentMousePosition.x, currentMousePosition.y);
+        strokeWeight(5);
+        stroke(255,255,255);
+        line(initialMousePosition.x, initialMousePosition.y, currentMousePosition.x, currentMousePosition.y);
+        
+    }
+    
+    resetMatrix();
+    userInterface.draw();
+    userInterfaceController.drawPadding();
     
 }
+
+
 
 //adds the zooming functionality
 
@@ -70,8 +125,8 @@ void mouseWheel(MouseEvent event) {
     float zoomX, zoomY;
   
         // Otherwise, zoom relative to the mouse position
-        zoomX = mouseX;
-        zoomY = mouseY;
+    zoomX = mouseX;
+    zoomY = mouseY;
 
 
     // Adjust pan to keep the point under the zoomX, zoomY fixed
@@ -86,17 +141,20 @@ void mouseWheel(MouseEvent event) {
     initialMousePosition.x = panX + (initialMousePosition.x - panX) * scale;
     initialMousePosition.y = panY + (initialMousePosition.y - panY) * scale;
     }
+
 void mousePressed() {
     //creates a new object at the mouses current coordinaes
     if (!userInterface.isMouseOver() && mouseButton == LEFT) {
        // Adjust initial mouse position based on panning and zooming amount
-        float worldMouseX = (mouseX / zoom) - panX;
-        float worldMouseY = (mouseY / zoom) - panY;
-        initialMousePosition.set(worldMouseX, worldMouseY);
+        PVector currentMousePosition = getMouseWorldCoordinates();
+        initialMousePosition.set(currentMousePosition.x, currentMousePosition.y);
         mousePressed = true;
         mouseReleased = false;
+    }
 }
-}
+
+
+
 
 void mouseDragged() {
     if(mouseButton == RIGHT && !userInterface.isMouseOver() && userInterface.getController("Lock View to Center of Mass").getValue() == 0) {
@@ -163,131 +221,16 @@ void lockToCenterOfMass() {
     
 }
 
-void draw() {
-
-background(16,18,19);
-
-
-
-// Apply zoom and pan transformations
-
-noFill();
-strokeWeight(2);
-strokeJoin(MITER);
-stroke(#3f3f3f);
-beginShape();
-vertex(paddingX, paddingY);
-vertex(width - paddingX, paddingY);
-vertex(width - paddingX, height - paddingY);
-vertex(paddingX, height - paddingY);
-vertex(paddingX, paddingY);
-endShape();
-
-    if(userInterface.getController("Lock View to Center of Mass").getValue() == 1) {
-        this.lockToCenterOfMass();
-        translate(width/2, height/2);
-        scale(zoom);
-        translate(-width/2, -height/2);
-        translate(lockedPanX, lockedPanY);
-        panX = lockedPanX;
-        panY = lockedPanY;
-    } else{
-        scale(zoom);
-        translate(panX, panY);
-    }
-/*
-for (int majorVerticalGridLine = 10; majorVerticalGridLine < (width - paddingX) / zoom; majorVerticalGridLine += 120) {
-    fill(#3f3f3f);
-    rect(majorVerticalGridLine, paddingY / zoom, 1 / zoom, (height - 2 * paddingY) / zoom);
-} 
-for (int secondaryMajorVerticalGridline = 70; secondaryMajorVerticalGridline < (width - paddingX) / zoom; secondaryMajorVerticalGridline += 60) {
-    fill(#3f3f3f);
-    rect(secondaryMajorVerticalGridline, paddingY / zoom, 0.5 / zoom, (height - 2 * paddingY) / zoom);
-}
-for (int minorVerticalGridLine = 10; minorVerticalGridLine < (width - paddingX) / zoom; minorVerticalGridLine += 30) {
-    fill(#3f3f3f);
-    rect(minorVerticalGridLine, paddingY / zoom, 0.25 / zoom, (height - 2 * paddingY) / zoom);
+PVector getMouseWorldCoordinates() {
+  if(userInterface.getController("Lock View to Center of Mass").getValue() == 1) {
+    return new PVector((mouseX - width / 2) / zoom + centerOfMass.x, (mouseY - height / 2) / zoom + centerOfMass.y);
+  } else {
+    return new PVector((mouseX / zoom) - panX, (mouseY / zoom) - panY);
+  }
 }
 
-// Horizontal grid lines
-for (int majorHorizontalGridLine = 10; majorHorizontalGridLine < (height - paddingY) / zoom; majorHorizontalGridLine += 120) {
-    fill(#3f3f3f);
-    rect(paddingX / zoom, majorHorizontalGridLine, (width - 2 * paddingX) / zoom, 1 / zoom);
-}
-for (int secondaryMajorHorizontalGridline = 70; secondaryMajorHorizontalGridline < (height - paddingY) / zoom; secondaryMajorHorizontalGridline += 60) {
-    fill(#3f3f3f);
-    rect(paddingX / zoom, secondaryMajorHorizontalGridline, (width - 2 * paddingX) / zoom, 0.5 / zoom);
-}
-for (int minorHorizontalGridLine = 10; minorHorizontalGridLine < (height - paddingY) / zoom; minorHorizontalGridLine += 30) {
-    fill(#3f3f3f);
-    rect(paddingX / zoom, minorHorizontalGridLine, (width - 2 * paddingX) / zoom, 0.25 / zoom);
-}
-*/
 
 
-
-
-// Calculate the screen space position of the corners of the viewport
-
-// Draw the grid
-/*
-stroke(#3f3f3f);
-for (float x = firstLineX; x < width - panX - padding; x += gridSpacing) {
-    float screenX = (x + panX);
-    line(screenX + padding, padding, screenX + padding, height-padding);
-}
-for (float y = firstLineY; y < height - panY -  padding; y += gridSpacing) {
-    float screenY = (y + panY);
-    line(padding, screenY + padding, width - padding, screenY + padding);
-}
-
-*/
-// Define grid spacing
-
-// Draw vertical grid lines
-/*
-for (int i = gridStartX; i <= gridEndX; i += 10) {
-    float lineWidth = (i % 120 == 0) ? 1 : (i % 60 == 0) ? 0.5 : 0.25;
-    rect(i, 0, lineWidth / zoom, height / zoom);
-}
-
-// Draw horizontal grid lines
-for (int i = gridStartY; i <= gridEndY; i += 10) {
-    float lineHeight = (i % 120 == 0) ? 1 : (i % 60 == 0) ? 0.5 : 0.25;
-    rect(0, i, width / zoom, lineHeight / zoom);
-}
-*/
-
-
-    colorMode(RGB, 255);
-    hint(ENABLE_STROKE_PURE);
-
-    
-    
-    simulation.display();
-    simulation.updateVectors();
-    userInterfaceController.centerOfMass(simulation.getBodyArray());
-    simulation.updateBodies();
-    
-    
-    if (mousePressed == true && mouseReleased == false &&  userInterface.getController("Fixed Body").getValue() == 0) {
-        //adjusts current mouse position based on panning amount
-        float worldMouseX = (mouseX / zoom) - panX;
-        float worldMouseY = (mouseY / zoom) - panY;
-        
-        stroke(0,0,0);
-        strokeWeight(12.5);
-        line(initialMousePosition.x, initialMousePosition.y, worldMouseX, worldMouseY);
-        strokeWeight(5);
-        stroke(255,255,255);
-        line(initialMousePosition.x, initialMousePosition.y, worldMouseX, worldMouseY);
-        
-    }
-    
-    resetMatrix();
-    userInterface.draw();
-    
-}
 
 
 

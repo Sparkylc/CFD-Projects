@@ -8,6 +8,12 @@ class UserInterface {
         int paddingY = 30;
         int sliderWidth = 200;
 
+        float centerOfMassX;
+        float centerOfMassY;
+
+        float globalPaddingX = 50;
+        float globalPaddingY = 50;
+
 
 
         //the constructor uses the passed object to make changes, while the methods outside of the constructor use the already created object in the 
@@ -168,8 +174,6 @@ class UserInterface {
                 }
         }
         
-        float centerOfMassX;
-        float centerOfMassY;
         void centerOfMass(ArrayList<Body> bodies){
                 if(userInterface.get("Show Center of Mass").getValue() == 1){
                         float totalMass = 0;
@@ -189,7 +193,88 @@ class UserInterface {
                 }
         }
 
+void drawPadding(){
+        fill(16, 18, 19);
+        noStroke();
+        rect(0,0, globalPaddingX, height);
+        rect(0,0, width, globalPaddingY);
+        rect(width - globalPaddingX, 0, globalPaddingX, height);
+        rect(0, height - globalPaddingY, width, globalPaddingY);
+        stroke(#3f3f3f);
+        strokeWeight(1);
+        line(globalPaddingX, globalPaddingY, width - globalPaddingX, globalPaddingY);
+        line(globalPaddingX, globalPaddingY, globalPaddingX, height - globalPaddingY);
+        line(width - globalPaddingX, globalPaddingY, width - globalPaddingX, height - globalPaddingY);
+        line(globalPaddingX, height - globalPaddingY, width - globalPaddingX, height - globalPaddingY);
+
+}
+void drawGrid(){
+
+  float majorGridSize = 120;
+  float secondaryMajorGridSize = 60;
+  float minorGridSize = 30;
+
+  // Calculate the number of grid lines based on the screen size and grid size
+  int majorNumVerticalLines = min(ceil(width / majorGridSize), 1000);
+  int secondaryMajornumVerticalLines = min(ceil(width / secondaryMajorGridSize), 1000);
+  int minorNumVerticalLines = min(ceil(width / minorGridSize), 1000);
+
+  int majorNumHorizontalLines = min(ceil(height / majorGridSize), 1000);
+  int secondaryMajornumHorizontalLines = min(ceil(height / secondaryMajorGridSize), 1000);
+  int minorNumHorizontalLines = min(ceil(height / minorGridSize), 1000);
+
+  float majorOffsetX = ((panX-width/2) * zoom) % majorGridSize;
+  float majorOffsetY = ((panY-height/2) * zoom) % majorGridSize;
+
+  float secondaryMajorOffsetX = ((panX-width/2)* zoom) % secondaryMajorGridSize;
+  float secondaryMajorOffsetY = ((panY-height/2) * zoom) % secondaryMajorGridSize;
+
+  float minorOffsetX = ((panX-width/2) * zoom) % minorGridSize;
+  float minorOffsetY = ((panY-height/2) * zoom) % minorGridSize;
+
+// Draw the major vertical gridlines
+for (int i = 0; i <= majorNumVerticalLines; i++) {
+    float x = i * majorGridSize + majorOffsetX;
+    fill(#3f3f3f);
+    rect(x, 0, 1, height);
+}
+
+// Draw the major horizontal grid lines
+for (int i = 0; i <= majorNumHorizontalLines; i++) {
+    float y = i * majorGridSize + majorOffsetY;
+    fill(#3f3f3f);
+    rect(0, y, width, 0.25);
+}
+
+// Draw the secondary major vertical gridlines
+for (int i = 0; i <= secondaryMajornumVerticalLines; i++) {
+    float x = i * secondaryMajorGridSize + secondaryMajorOffsetX;
+    fill(#3f3f3f);
+    rect(x, 0, 0.5, height);
+}
+
+// Draw the secondary major horizontal grid lines
+for (int i = 0; i <= secondaryMajornumHorizontalLines; i++) {
+    float y = i * secondaryMajorGridSize + secondaryMajorOffsetY;
+    fill(#3f3f3f);
+    rect(0, y, width, 0.25);
+}
+
+//Draw the minor vertical gridlines
+for (int i = 0; i <= minorNumVerticalLines; i++) {
+    float x = i * minorGridSize + minorOffsetX;
+    fill(#3f3f3f);
+    rect(x, 0, 0.25, height);
+}
+
+// Draw the minor horizontal grid lines
+for (int i = 0; i <= minorNumHorizontalLines; i++) {
+    float y = i * minorGridSize + minorOffsetY;
+    fill(#3f3f3f);
+    rect(0, y, width, 0.25);
+}
          
+}
 }
 
 
