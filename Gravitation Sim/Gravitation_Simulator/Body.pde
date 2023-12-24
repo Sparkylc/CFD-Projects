@@ -10,9 +10,8 @@ class Body {
     PVector currentAccelerationVector = new PVector();
     PVector screenSpacePosition = new PVector();
     
-    
-    boolean isFixed;
-    
+
+
     //creates an integrator object with this object as an input
     Integrator objectIntegrator = new Integrator(this);
     
@@ -24,14 +23,10 @@ class Body {
     
     
     //5parameter constructor
-    Body(PVector position, float mass, float radius, boolean isFixed) {
-        this.position = position;
-        this.screenSpacePosition = position;
+    Body(PVector position, float mass, float radius) {
+        this.position = position.copy();
         this.mass = mass;
         this.radius = radius;
-        this.isFixed = isFixed;
-        this.initialPosition = position;
-        
 }
     
     void initialVelocity(PVector initialMousePosition, PVector finalMousePosition) {
@@ -56,29 +51,22 @@ class Body {
     //updates the body's position, velocity, and acceleration
     void updateBody() {
         //sets the object integrator type
-        if (!isFixed) {//creates a copy of the acceleration vector for the user interface before it is reset for the next acceleration calculation
+        //creates a copy of the acceleration vector for the user interface before it is reset for the next acceleration calculation
             this.currentAccelerationVector = this.acceleration.copy();
             
             //creates the velocity and acceleration vectors. this is done with the current frame information so that what is displayed is the current velocity
             //and acceleration, not the velocity and acceleration from the next frame
             userInterfaceController.velocityVectorArrow(this);
             userInterfaceController.accelerationVectorArrow(this);
-            
 
-            
             //updates the position, velocity, and acceleration vectors using the verlet integration mode
             objectIntegrator.verletIntegrator();
-            
-            //runsthe constrain method for window bounds
-            //this.constrain();
-            
-            //runsthe collision detection method on the entire body array
+            //runs the collision detection method on the entire body array
             this.collisionDetection(simulation.getBodyArray());
     }
-        if (isFixed) {
-            this.position = initialPosition;
-    }
-}
+    
+  
+
         
     //checks if the current object is within the minimum distance of the other object, and performs a correction so that the body doesnt intersect itself
     boolean hasCollided(Body body) {
@@ -88,10 +76,10 @@ class Body {
             float distanceCorrection = ((body.radius + this.radius) / 2 - distanceVector.mag()) / 2;
             PVector d = distanceVector.copy();
             PVector correctionVector = d.normalize().mult(distanceCorrection);
-            if (!body.isFixed) {
+            if (!(body instanceof FixedBody)) {
                 body.position.add(correctionVector);
         }
-            if (!this.isFixed) {
+            if (!(this instanceof FixedBody)) {
                 position.sub(correctionVector);
         }
             return true;
@@ -119,7 +107,7 @@ class Body {
 } 
     //creates the collision response based off of a perfectly elastic collision
     void collisionResponse(Body body) {
-        if (!this.isFixed && !body.isFixed) {
+        if (!(body instanceof FixedBody) && !(this instanceof FixedBody)) {
             /* First you find the normal vector, the vector that crosses through both centers, and the vector tangential to their point of impact,
             ie the vector orthogonal to the line between the two centers of the bodies:
             
@@ -244,80 +232,6 @@ class Body {
             
             //System.out.println(velocity);
             
-        } else {
-            //if this body object is fixed, do a collision response with the other body object without accounting for momentum, just assuming purely elastic
-            if (this.isFixed) {
-                PVector unitNormalVector = PVector.sub(body.position, position).normalize();
-                PVector unitTangentVector = new PVector( - 1 * unitNormalVector.y, unitNormalVector.x);
-                float secondaryBodyScalarNormalVelocity = PVector.dot(unitNormalVector, body.velocity) *-  1;
-                float secondaryBodyScalarTangentialVelocity = PVector.dot(unitTangentVector, body.velocity);
-                PVector newSecondaryBodyNormalVelocity = PVector.mult(unitNormalVector, secondaryBodyScalarNormalVelocity);
-                PVector newSecondaryBodyTangentialVelocity = PVector.mult(unitTangentVector, secondaryBodyScalarTangentialVelocity);
-                body.velocity = PVector.add(newSecondaryBodyNormalVelocity, newSecondaryBodyTangentialVelocity);
-            }
-            //same check as the other one, just if the other object is fixed as to update the current object correctly;
-            if (body.isFixed) {
-                PVector unitNormalVector = PVector.sub(body.position, position).normalize();
-                PVector unitTangentVector = new PVector( - 1 * unitNormalVector.y, unitNormalVector.x);
-                float newPrimaryBodyScalarNormalVelocity = PVector.dot(unitNormalVector, this.velocity) *-  1;
-                float newPrimaryBodyScalarTangentialVelocity = PVector.dot(unitTangentVector, this.velocity);
-                PVector newPrimaryBodyNormalVelocity = PVector.mult(unitNormalVector, newPrimaryBodyScalarNormalVelocity);
-                PVector newPrimaryBodyTangentialVelocity = PVector.mult(unitTangentVector, newPrimaryBodyScalarTangentialVelocity);
-                this.velocity = PVector.add(newPrimaryBodyNormalVelocity, newPrimaryBodyTangentialVelocity);
-            }
-        }
+        } 
     }
-    }
-        
-        /*
-        void constrain() {
-            //multiplies each velocity by this to dampen wall impacts
-            //checks if body is  out of bounds and simply flips the direction of velocity
-            
-            if (this.position.x - this.radius < paddingX || this.position.x + this.radius > screenWidth - paddingX) {
-                float temp;
-                if (this.position.x - this.radius / 2 < paddingX) {
-                   temp = this.position.x;
-                    this.position.x = previousPosition.x;
-                    previousPosition.x = temp;
-                }
-                if (this.position.x + this.radius / 2 > screenWidth - paddingX) {
-                   temp = this.position.x;
-                    this.position.x = previousPosition.x;
-                    previousPosition.x = temp;
-                }
-                if (this.position.x + this.radius / 2 > screenWidth) {
-                    this.position.x = screenWidth - this.radius / 2;
-                }
-                if (this.position.x - this.radius / 2 < 0) {
-                    this.position.x = this.radius / 2;
-                }
-                
-        }
-            if (this.position.y - this.radius / 2 < paddingY || this.position.y + this.radius / 2 > screenHeight - paddingY) {
-                float temp;
-                if (this.position.y - this.radius / 2 < paddingY) {
-                   temp = this.position.y;
-                    this.position.y = previousPosition.y;
-                    previousPosition.y = temp;
-                }
-                if (this.position.y + this.radius / 2 > screenHeight - paddingY) {
-                   temp = this.position.y;
-                    this.position.y = previousPosition.y;
-                    previousPosition.y = temp;
-                }
-                if (this.position.y + this.radius / 2 > screenHeight) {
-                    this.position.y = screenHeight - this.radius / 2;
-                }
-                if (this.position.y - this.radius / 2 < 0) {
-                    this.position.y = this.radius / 2;
-                }
-        }
-        }
-        
-        */
-        
-        
-        
-        
-        
+}

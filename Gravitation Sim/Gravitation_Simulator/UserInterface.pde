@@ -1,18 +1,57 @@
 
-
-
 class UserInterface {
-        int individualControlsGroupBackgroundHeight = 200;
-        int individualControlsGroupWidth = 320;
-        int paddingX = 30;
-        int paddingY = 30;
-        int sliderWidth = 200;
+        ArrayList<Tab> tabs = new ArrayList<Tab>();
+        //the active tab
 
+        //the width and height of the groups
+        int globalGroupBackgroundHeight = 300;
+        int globalGroupWidth = 320;   
+
+        //width and height of the sliders
+        int globalSliderWidth = 200;
+        int globalSliderHeight = 20;
+
+        //sets the bar height for the tob of the group
+        int globalGroupBarHeight = 20;
+
+        //center of mass position variables
         float centerOfMassX;
         float centerOfMassY;
 
-        float globalPaddingX = 50;
-        float globalPaddingY = 50;
+        //the global padding used for the borders and to position the groups
+        int globalPaddingX = 50;
+        int globalPaddingY = 50;
+
+
+        //global initial position for the elements of the group
+        int globalInitialPositionX = 10;
+        int globalInitialPositionY = 20;
+        
+        //the global padding used to position elements within the groups (this is relative to group coordinates)
+        int globalGroupElementPaddingX = 10;
+        int globalGrouldElementPaddingY = 10;
+
+        //the control group background color
+        int globalGroupColor = color(250, 50);
+
+        //this basically tells you the spacing between the elements of the group
+        int globalGroupElementSpacingX = 30;
+        int globalGroupElementSpacingY = 30;
+
+        //zero indexed element number to do the spacing based on how many elements there are sequentially
+        int elementNumber = 0; 
+
+
+
+        //variables for the line  
+        int pathLength = 1000;
+        float[] xvals = new float[pathLength];
+        float[] yvals = new float[pathLength];
+        
+
+
+
+
 
 
 
@@ -20,178 +59,404 @@ class UserInterface {
         //gravity simulation class
 
         UserInterface(ControlP5 userInterface){
+                //hides the default tab
                 // initializes the tabs for the user interface
-                Group individualControls = userInterface.addGroup("Controls")
-                                .setPosition(screenWidth-individualControlsGroupWidth+paddingX, paddingY)
-                                .setBackgroundHeight(300)
-                                .setBarHeight(20)
-                                .setBackgroundColor(color(255,50))
-                                .setWidth(sliderWidth+paddingX*2)
-                                .disableCollapse();
+                
+                Tab controlTab = userInterface.addTab("controlTab")
+                                .setLabel("Controls")
+                                .setId(0);
+                        tabs.add(controlTab);
+                         
+
+                Tab sunTab = userInterface.addTab("sunTab")
+                                .setLabel("Sun")
+                                .setId(1);
+                        tabs.add(sunTab);
+
+                Tab planetTab = userInterface.addTab("planetTab")
+                                .setLabel("Planet");
+                  
+
+                Tab moonTab = userInterface.addTab("moonTab")
+                                .setLabel("Moon");
                               
 
-                Slider mass = userInterface.addSlider("Mass")
-                                .setPosition(10, 20)
-                                .setSize(200,20)
-                                .setRange(0, 2000)
-                                .setValue(1000)
-                                .setGroup(individualControls);
-                 
+                Tab celestialObjectsTab = userInterface.addTab("CelestialObjectsTab")
+                                .setLabel("Celestial Objects");
+                              
+                
+               
 
-                Slider radius = userInterface.addSlider("Radius")
-                                .setPosition(10, 50)
-                                .setSize(200,20)
-                                .setRange(0, 200)
-                                .setValue(100)
-                                .setGroup(individualControls);
-                        
-
-                Button resetSimulation = userInterface.addButton("Reset Simulation")
-                                .setPosition(10, 80)
-                                .setSize(200,20)
-                                .setGroup(individualControls)
-                                .onClick(new CallbackListener() {
-                                         void controlEvent(CallbackEvent theEvent) {
-                                                simulation.resetSimulation();
-                                        }
-                                });
-                        
-
-
-                Toggle showVelocityVectors = userInterface.addToggle("Show Velocity Vectors")
-                                .setPosition(10, 110)
-                                .setSize(200,20)
-                                .setGroup(individualControls)
-                                .setValue(false)
-                                ;
-                       
-
-                Toggle showAccelerationVectors = userInterface.addToggle("Show Acceleration Vectors")
-                                .setPosition(10, 140)
-                                .setSize(200,20)
-                                .setGroup(individualControls)
-                                .setValue(false)
+                //creates the group for the basical controls group
+                Group controlsGroup = userInterface.addGroup("Controls")
+                                .setPosition(width - globalGroupWidth + globalPaddingX, globalPaddingY)
+                                .setBackgroundHeight(globalGroupBackgroundHeight)
+                                .setBarHeight(globalGroupBarHeight)
+                                .setBackgroundColor(globalGroupColor)
+                                .setWidth(globalSliderWidth + globalPaddingX * 2)
+                                .disableCollapse()
+                                .setTab("controlTab")
                                 ;
 
-                            
-                Toggle fixedBody = userInterface.addToggle("Fixed Body")
-                                .setPosition(10, 170)
-                                .setSize(200,20)
-                                .setGroup(individualControls)
-                                .setValue(false)
-                                ;
 
-                Slider gravityScale = userInterface.addSlider("Gravity Scale")
-                                .setPosition(10, 200)
-                                .setSize(200,20)
-                                .setRange(1, 100)
-                                .setValue(25)
-                                .setGroup(individualControls)
-                                .onChange(new CallbackListener() {
-                                        void controlEvent(CallbackEvent theEvent) {
-                                                float gravityScaleValue = userInterface.getController("Gravity Scale").getValue();
-                                                gravitationalScalingCoefficient = gravityScaleValue;
+
+                        Slider controlMass = userInterface.addSlider("controlTab Mass")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth, globalSliderHeight)
+                                        .setLabel("Mass")
+                                        .setRange(0, 2000)
+                                        .setValue(1000)
+                                        .setGroup(controlsGroup)
+                                        ;
+                                        elementNumber++;
+
+                        Slider controlRadius = userInterface.addSlider("controlTab Radius")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Radius")
+                                        .setRange(0, 200)
+                                        .setValue(100)
+                                        .setGroup(controlsGroup)
+                                        ;
+                                        elementNumber++;
+
+                        Button controlResetSimulation = userInterface.addButton("controlTab Reset Simulation")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Reset Simulation")
+                                        .setGroup(controlsGroup)
+                                        .onClick(new CallbackListener() {
+                                                 void controlEvent(CallbackEvent theEvent) {
+                                                        simulation.resetSimulation();
                                                 }
-                                        });
+                                        })
+                                        ;
+                                        elementNumber++;
 
-                Toggle showCenterOfMass = userInterface.addToggle("Show Center of Mass")
-                                .setPosition(10, 230)
-                                .setSize(200,20)
-                                .setGroup(individualControls)
-                                .setValue(false)
+
+
+                        Toggle controlShowVelocityVectors = userInterface.addToggle("controlTab Show Velocity Vectors")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Show Velocity Vectors")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+
+                        Toggle controlShowAccelerationVectors = userInterface.addToggle("controlTab Show Acceleration Vectors")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Show Acceleration Vectors")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+
+                        Toggle controlFixedBody = userInterface.addToggle("controlTab Fixed Body")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Fixed Body")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+                        Slider controlGravityScale = userInterface.addSlider("controlTab Gravity Scale")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Gravity Scale")
+                                        .setRange(1, 100)
+                                        .setValue(25)
+                                        .setGroup(controlsGroup)
+                                        .onChange(new CallbackListener() {
+                                                void controlEvent(CallbackEvent theEvent) {
+                                                        float gravityScaleValue = userInterface.getController(activeTab + " Gravity Scale").getValue();
+                                                        gravitationalScalingCoefficient = gravityScaleValue;
+                                                        }
+                                                })
+                                        ;
+                                        elementNumber++;
+
+                        Toggle controlShowCenterOfMass = userInterface.addToggle("controlTab Show Center of Mass")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Show Center of Mass")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+                        Toggle controlLockViewToCenterOfMass = userInterface.addToggle("controlTab Lock View to Center of Mass")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth,20)
+                                        .setLabel("Lock View to Center of Mass")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+                        Toggle controlShowTrail = userInterface.addToggle("controlTab Show Trail")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth,20)
+                                        .setLabel("Show Trail")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber = 0;
+
+
+                //group for sun controls
+                Group sunGroup = userInterface.addGroup("sunGroup")
+                                .setLabel("Sun Controls")
+                                .setPosition(width - globalGroupWidth + globalPaddingX, globalPaddingY)
+                                .setBackgroundHeight(globalGroupBackgroundHeight)
+                                .setBarHeight(globalGroupBarHeight)
+                                .setBackgroundColor(globalGroupColor)
+                                .setWidth(globalSliderWidth + globalPaddingX * 2)
+                                .disableCollapse()
+                                .setTab("sunTab")
                                 ;
-                Toggle lockViewToCenterOfMass = userInterface.addToggle("Lock View to Center of Mass")
-                                .setPosition(10, 260)
-                                .setSize(200,20)
-                                .setGroup(individualControls)
-                                .setValue(false)
-                                ;
-                              
 
-                userInterface.getController("Show Velocity Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
-                userInterface.getController("Show Acceleration Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
-                userInterface.getController("Fixed Body").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
-                userInterface.getController("Reset Simulation").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
-                userInterface.getController("Gravity Scale").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
-                userInterface.getController("Show Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
 
+
+                        Slider sunMass = userInterface.addSlider("sunTab Mass")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth, globalSliderHeight)
+                                        .setLabel("Sun Mass")
+                                        .setRange(0, 2000000)
+                                        .setValue(1000000)
+                                        .setGroup(sunGroup)
+                                        ;
+                                        elementNumber++;
+
+                        Slider sunRadius = userInterface.addSlider("sunTab Radius")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Sun Radius")
+                                        .setRange(0, 10000)
+                                        .setValue(5000)
+                                        .setGroup(sunGroup)
+                                        ;
+                                        elementNumber++;
+
+                        Button sunResetSimulation = userInterface.addButton("sunTab Reset Simulation")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Reset Simulation")
+                                        .setGroup(sunGroup)
+                                        .onClick(new CallbackListener() {
+                                                 void controlEvent(CallbackEvent theEvent) {
+                                                        simulation.resetSimulation();
+                                                }
+                                        })
+                                        ;
+                                        elementNumber++;
+
+
+
+                        Toggle sunShowVelocityVectors = userInterface.addToggle("sunTab Show Velocity Vectors")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Show Velocity Vectors")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+
+                        Toggle sunShowAccelerationVectors = userInterface.addToggle("sunTab Show Acceleration Vectors")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Show Acceleration Vectors")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+
+                        Toggle sunFixedBody = userInterface.addToggle("sunTab Fixed Body")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Fixed Body")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+                        Slider sunGravityScale = userInterface.addSlider("sunTab Gravity Scale")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Gravity Scale")
+                                        .setRange(1, 100)
+                                        .setValue(1)
+                                        .setGroup(sunGroup)
+                                        .onChange(new CallbackListener() {
+                                                void controlEvent(CallbackEvent theEvent) {
+                                                        float gravityScaleValue = userInterface.getController(activeTab + " Gravity Scale").getValue();
+                                                        gravitationalScalingCoefficient = gravityScaleValue;
+                                                        }
+                                                })
+                                        ;
+                                        elementNumber++;
+
+                        Toggle sunShowCenterOfMass = userInterface.addToggle("sunTab Show Center of Mass")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(200,20)
+                                        .setLabel("Show Center of Mass")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+
+                        Toggle sunlockViewToCenterOfMass = userInterface.addToggle("sunTab Lock View to Center of Mass")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth, 20)
+                                        .setLabel("Lock View to Center of Mass")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber++;
+                        Toggle sunShowTrail = userInterface.addToggle("sunTab Show Trail")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth,20)
+                                        .setLabel("Show Trail")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        ;
+                                        elementNumber = 0;
+
+             
+                
+                
+                
+                
+                //Formatting
+                userInterface.getController("controlTab Show Velocity Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Show Acceleration Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Fixed Body").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Reset Simulation").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Gravity Scale").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Show Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Lock View to Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Show Trail").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+
+                userInterface.getController("sunTab Show Velocity Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Show Acceleration Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Fixed Body").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Reset Simulation").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Gravity Scale").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Show Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Lock View to Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("sunTab Show Trail").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                
+                userInterface.getTab("default").hide();
+
+                
+
+
+
+    
         }
 
 
-        //creates the velocity vector arrow for the body
-        void velocityVectorArrow(Body body){
-              if(userInterface.get("Show Velocity Vectors").getValue() == 1){
-                // draw a line representing the velocity vector of the body
-                
-               
-                // set the color of the line to red
-                float arrowLength = 20; // length of the arrow
-                float arrowAngle = PI / 4; // angle of the arrow
-                float arrowX = body.position.x + body.velocity.x * arrowLength * cos(arrowAngle);
-                float arrowY = body.position.y + body.velocity.y * arrowLength * sin(arrowAngle);
-                stroke(0,0,0);
-                strokeWeight(12.5);
-                line(body.position.x, body.position.y, arrowX, arrowY);
-                strokeWeight(5);
-                stroke(255,255,255);
-                line(body.position.x, body.position.y, arrowX, arrowY);
+//gets the name of the current active group (workaround for not being able to find tab name)
+String getActiveTab() {
+    for (Tab tab : tabs) {
+        if (tab.isActive()) {
+                if(tab.getId() == 0){
+                        return "controlTab";
+                }
+                if(tab.getId() == 1){
+                        return "sunTab";
+                }
+                if(tab.getId() == 2){
+                        return "planetTab";
+                }
+                if(tab.getId() == 3){
+                        return "moonTab";
+                }
+                if(tab.getId() == 4){
+                        return "CelestialObjectsTab";
+                }
+        }
+    }
+    //default return for initialization
+    return "controlTab";
+}
+//creates the velocity vector arrow for the body
+void velocityVectorArrow(Body body){
+      if(userInterface.get(activeTab + " Show Velocity Vectors").getValue() == 1){
+        // draw a line representing the velocity vector of the body
+        
+        // set the color of the line to red
+        float arrowLength = 20; // length of the arrow
+        float arrowAngle = PI / 4; // angle of the arrow
+        float arrowX = body.position.x + body.velocity.x * arrowLength * cos(arrowAngle);
+        float arrowY = body.position.y + body.velocity.y * arrowLength * sin(arrowAngle);
+        stroke(0,0,0);
+        strokeWeight(12.5);
+        line(body.position.x, body.position.y, arrowX, arrowY);
+        strokeWeight(5);
+        stroke(255,255,255);
+        line(body.position.x, body.position.y, arrowX, arrowY);
+        // add arrow head
+        float arrowHeadSize = 5; // size of the arrow head
+        pushMatrix();
+        translate(arrowX, arrowY);
+        rotate(atan2(arrowY - body.position.y, arrowX - body.position.x));
+        stroke(0, 0, 0);
+        strokeWeight(12.5);
+        triangle(-arrowHeadSize, arrowHeadSize / 2 , -arrowHeadSize, -arrowHeadSize / 2, 0, 0);
+        stroke(255,255,255);
+        strokeWeight(5);
+        triangle(-arrowHeadSize, arrowHeadSize / 2, -arrowHeadSize, -arrowHeadSize / 2 , 0, 0);
+        popMatrix();
+        }
+       
+}
 
-                // add arrow head
+
+//creates the acceleration vector arrow for the body
+void accelerationVectorArrow(Body body) {
+        if (userInterface.get(activeTab + " Show Acceleration Vectors").getValue() == 1) {
+                // draw a line representing the acceleration vector of the body
+                stroke(0, 0, 255); // set the color of the line to blue
+                float arrowLength = 20; // length of the arrow
+                float dampeningFactor = 0.002; // dampening factor for scaling the vector                
+                float arrowX = body.position.x + body.currentAccelerationVector.x * arrowLength * dampeningFactor;
+                float arrowY = body.position.y + body.currentAccelerationVector.y * arrowLength * dampeningFactor;
+                line(body.position.x, body.position.y, arrowX, arrowY);                // add arrow head
                 float arrowHeadSize = 5; // size of the arrow head
                 pushMatrix();
                 translate(arrowX, arrowY);
                 rotate(atan2(arrowY - body.position.y, arrowX - body.position.x));
-                stroke(0, 0, 0);
-                strokeWeight(12.5);
-                triangle(-arrowHeadSize, arrowHeadSize / 2 , -arrowHeadSize, -arrowHeadSize / 2, 0, 0);
-                stroke(255,255,255);
-                strokeWeight(5);
-                triangle(-arrowHeadSize, arrowHeadSize / 2, -arrowHeadSize, -arrowHeadSize / 2 , 0, 0);
+                triangle(-arrowHeadSize, arrowHeadSize / 2, -arrowHeadSize, -arrowHeadSize / 2, 0, 0);
                 popMatrix();
-                }
         }
-
-
-        //creates the acceleration vector arrow for the body
-        void accelerationVectorArrow(Body body) {
-                if (userInterface.get("Show Acceleration Vectors").getValue() == 1) {
-                        // draw a line representing the acceleration vector of the body
-                        stroke(0, 0, 255); // set the color of the line to blue
-                        float arrowLength = 20; // length of the arrow
-                        float dampeningFactor = 0.002; // dampening factor for scaling the vector
-
-                        float arrowX = body.position.x + body.currentAccelerationVector.x * arrowLength * dampeningFactor;
-                        float arrowY = body.position.y + body.currentAccelerationVector.y * arrowLength * dampeningFactor;
-                        line(body.position.x, body.position.y, arrowX, arrowY);
-
-                        // add arrow head
-                        float arrowHeadSize = 5; // size of the arrow head
-                        pushMatrix();
-                        translate(arrowX, arrowY);
-                        rotate(atan2(arrowY - body.position.y, arrowX - body.position.x));
-                        triangle(-arrowHeadSize, arrowHeadSize / 2, -arrowHeadSize, -arrowHeadSize / 2, 0, 0);
-                        popMatrix();
-                }
-        }
+}
         
-        void centerOfMass(ArrayList<Body> bodies){
-                if(userInterface.get("Show Center of Mass").getValue() == 1){
-                        float totalMass = 0;
-                        float totalX = 0;
-                        float totalY = 0;
-                        for(int i = 0; i < bodies.size(); i++){
-                                totalMass += bodies.get(i).mass;
-                                totalX += bodies.get(i).position.x * bodies.get(i).mass;
-                                totalY += bodies.get(i).position.y * bodies.get(i).mass;
-                        }
-                        float centerOfMassX = totalX / totalMass;
-                        float centerOfMassY = totalY / totalMass;
-                        stroke(255,0,0);
-                        strokeWeight(100);
-                        point(centerOfMassX, centerOfMassY);
-               
+void centerOfMass(ArrayList<Body> bodies){
+        if(userInterface.get(activeTab + " Show Center of Mass").getValue() == 1){
+                float totalMass = 0;
+                float totalX = 0;
+                float totalY = 0;
+                for(int i = 0; i < bodies.size(); i++){
+                        totalMass += bodies.get(i).mass;
+                        totalX += bodies.get(i).position.x * bodies.get(i).mass;
+                        totalY += bodies.get(i).position.y * bodies.get(i).mass;
                 }
+                float centerOfMassX = totalX / totalMass;
+                float centerOfMassY = totalY / totalMass;
+                stroke(255,0,0);
+                strokeWeight(100);
+                point(centerOfMassX, centerOfMassY);
+       
         }
+}
+
+
 
 void drawPadding(){
         fill(16, 18, 19);
@@ -275,14 +540,35 @@ for (int i = 0; i <= minorNumHorizontalLines; i++) {
 }
          
 }
+
+
+
+
+void drawPath(){
+if(userInterface.get(activeTab + " Show Trail").getValue() == 1){
+ArrayList<Body> bodies = simulation.bodies;
+
+for(int body = 0; body < bodies.size(); body++){
+    if(!(bodies.get(body) instanceof FixedBody)){
+    for (int i = 1; i < pathLength; i++) { 
+        xvals[i-1] = xvals[i]; 
+        yvals[i-1] = yvals[i];
+
+    } 
+    xvals[pathLength-1] = bodies.get(body).position.x;
+    yvals[pathLength-1] = bodies.get(body).position.y;
+
+    // Draw a point at each coordinate
+    for(int i = 0; i < pathLength; i++) {
+        fill(#ffffff);
+        stroke(#ffffff);
+        strokeWeight(1/zoom);
+        point(xvals[i], yvals[i]);
+    }
+    }
 }
-
-
-
-
-
-
-                
-
+}
+}
+}
 
         

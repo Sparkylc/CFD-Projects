@@ -75,9 +75,7 @@
    //updates each body in the bodies arraylist with the aformentioned calculations
    for(int body = 0; body < bodies.size(); body++){
        //uses the updatebody function in the body class
-    
        bodies.get(body).updateBody();
-       
    }
   }
 
@@ -101,9 +99,9 @@
 
   void resetSimulation(){
     bodies.clear();
-    panX = 0;
-    panY = 0;
+    
     zoom = 1;
   }
 
 }
+
