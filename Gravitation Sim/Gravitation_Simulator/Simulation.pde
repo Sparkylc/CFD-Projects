@@ -1,6 +1,6 @@
  class Simulation {
   ArrayList<Body> bodies; //creates an arrayList with all of the body objects
-  double G = 1; //Gravitational Constant
+  float G = 1; //Gravitational Constant
   float  minimum = 0.01; //minimum distance between any two particles
   float totalEnergy = 0; //total energy of the system
 
@@ -103,5 +103,37 @@
     zoom = 1;
   }
 
+
+  void spawnOrbitingBody(Body centralBody, float mass, float radius, float distance) {
+    // Calculate the position of the orbiting body
+    float G = userInterface.getController(activeTab + " Gravity Scale").getValue();
+    PVector position = centralBody.position.copy();
+    position.add(distance, 0);  // Add the distance to the x-coordinate
+
+
+    // Create the orbiting body
+    Body orbitingBody = new Body(position, mass, radius);
+
+   
+    float initialVelocity = sqrt(G*centralBody.mass / distance);
+    PVector unitDirectionVector = new PVector(0, 1);
+          
+    orbitingBody.previousPosition = PVector.sub(orbitingBody.position, PVector.mult(unitDirectionVector,initialVelocity));
+
+    // Add the orbiting body to the simulation
+    this.addNewBody(orbitingBody);
+}
+
+
+Body getClickedBody() {
+    PVector mousePosition = getMouseWorldCoordinates();
+    for (Body body : bodies) {
+        float distance = PVector.dist(mousePosition, body.position);
+        if (distance <= body.radius) {
+            return body;
+        }
+    }
+    return null;  // Return null if no body was clicked
+}
 }
 

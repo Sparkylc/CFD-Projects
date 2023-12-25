@@ -63,6 +63,7 @@ class Body {
             objectIntegrator.verletIntegrator();
             //runs the collision detection method on the entire body array
             this.collisionDetection(simulation.getBodyArray());
+
     }
     
   

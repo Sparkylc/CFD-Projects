@@ -4,7 +4,7 @@ class UserInterface {
         //the active tab
 
         //the width and height of the groups
-        int globalGroupBackgroundHeight = 300;
+        int globalGroupBackgroundHeight = 400;
         int globalGroupWidth = 320;   
 
         //width and height of the sliders
@@ -47,6 +47,8 @@ class UserInterface {
         int pathLength = 1000;
         float[] xvals = new float[pathLength];
         float[] yvals = new float[pathLength];
+
+
         
 
 
@@ -94,7 +96,7 @@ class UserInterface {
                                 .setBarHeight(globalGroupBarHeight)
                                 .setBackgroundColor(globalGroupColor)
                                 .setWidth(globalSliderWidth + globalPaddingX * 2)
-                                .disableCollapse()
+                                 //.disableCollapse()
                                 .setTab("controlTab")
                                 ;
 
@@ -204,6 +206,47 @@ class UserInterface {
                                         .setGroup(controlsGroup)
                                         .setValue(false)
                                         ;
+                                        elementNumber++;
+                        Toggle controlGenerateOrbitingPlanet = userInterface.addToggle("controlTab Generate Orbiting Planet")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth,20)
+                                        .setLabel("Generate Orbiting Planet")
+                                        .setGroup(controlsGroup)
+                                        .setValue(false)
+                                        .onChange(new CallbackListener() {
+                                                void controlEvent(CallbackEvent theEvent) {
+                                                       userInterface.getController("controlTab Fixed Body").setValue(0);
+                                                }
+                                        })
+                                        ;
+                                        elementNumber++;
+                        Textfield controlPlanetMass = userInterface.addTextfield("controlTab Planet Mass")
+                                        .setPosition(globalGroupElementPaddingX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(50, 20)
+                                        .setText("")
+                                        .setGroup(controlsGroup)
+                                        .setColor(color(255,255,255))
+                                        .setVisible(true)
+                                        .setLabel("Mass")
+                                        ;
+                        Textfield controlPlanetRadius = userInterface.addTextfield("controlTab Planet Radius")
+                                        .setPosition(globalGroupElementPaddingX + 70, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(50, 20)
+                                        .setText("")
+                                        .setColor(color(255,255,255))
+                                        .setVisible(true)
+                                        .setGroup(controlsGroup)
+                                        .setLabel("Radius")
+                                        ;
+                        Textfield controlPlanetDistance = userInterface.addTextfield("controlTab Planet Distance")
+                                        .setPosition(globalGroupElementPaddingX + 140, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(50, 20)
+                                        .setText("")
+                                        .setColor(color(255,255,255))
+                                        .setVisible(true)
+                                        .setGroup(controlsGroup)
+                                        .setLabel("Distance")
+                                        ;
                                         elementNumber = 0;
 
 
@@ -215,7 +258,7 @@ class UserInterface {
                                 .setBarHeight(globalGroupBarHeight)
                                 .setBackgroundColor(globalGroupColor)
                                 .setWidth(globalSliderWidth + globalPaddingX * 2)
-                                .disableCollapse()
+                                //.disableCollapse()
                                 .setTab("sunTab")
                                 ;
 
@@ -325,7 +368,49 @@ class UserInterface {
                                         .setGroup(sunGroup)
                                         .setValue(false)
                                         ;
+                                        elementNumber++;
+                        Toggle sunGenerateOrbitingPlanet = userInterface.addToggle("sunTab Generate Orbiting Planet")
+                                        .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(globalSliderWidth,20)
+                                        .setLabel("Generate Orbiting Planet")
+                                        .setGroup(sunGroup)
+                                        .setValue(false)
+                                        .onChange(new CallbackListener() {
+                                                void controlEvent(CallbackEvent theEvent) {
+                                                       userInterface.getController("sunTab Fixed Body").setValue(0);
+                                                }
+                                        })
+                                        ;
+                                        elementNumber++;
+                        Textfield sunPlanetMass = userInterface.addTextfield("sunTab Planet Mass")
+                                        .setPosition(globalGroupElementPaddingX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(50, 20)
+                                        .setText("")
+                                        .setGroup(sunGroup)
+                                        .setColor(color(255,255,255))
+                                        .setVisible(true)
+                                        .setLabel("Mass")
+                                        ;
+                        Textfield sunPlanetRadius = userInterface.addTextfield("sunTab Planet Radius")
+                                        .setPosition(globalGroupElementPaddingX + 70, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(50, 20)
+                                        .setGroup(sunGroup)
+                                        .setText("")
+                                        .setColor(color(255,255,255))
+                                        .setVisible(true)
+                                        .setLabel("Radius")
+                                        ;
+                        Textfield sunPlanetDistance = userInterface.addTextfield("sunTab Planet Distance")
+                                        .setPosition(globalGroupElementPaddingX + 140, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
+                                        .setSize(50, 20)
+                                        .setGroup(sunGroup)
+                                        .setText("")
+                                        .setColor(color(255,255,255))
+                                        .setVisible(true)
+                                        .setLabel("Distance")
+                                        ;
                                         elementNumber = 0;
+                
 
              
                 
@@ -341,6 +426,12 @@ class UserInterface {
                 userInterface.getController("controlTab Show Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
                 userInterface.getController("controlTab Lock View to Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
                 userInterface.getController("controlTab Show Trail").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                userInterface.getController("controlTab Generate Orbiting Planet").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+                        
+                        
+                        
+
+
 
                 userInterface.getController("sunTab Show Velocity Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
                 userInterface.getController("sunTab Show Acceleration Vectors").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
@@ -350,7 +441,9 @@ class UserInterface {
                 userInterface.getController("sunTab Show Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
                 userInterface.getController("sunTab Lock View to Center of Mass").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
                 userInterface.getController("sunTab Show Trail").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
-                
+                userInterface.getController("sunTab Generate Orbiting Planet").getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+        
+
                 userInterface.getTab("default").hide();
 
                 
@@ -359,7 +452,6 @@ class UserInterface {
 
     
         }
-
 
 //gets the name of the current active group (workaround for not being able to find tab name)
 String getActiveTab() {

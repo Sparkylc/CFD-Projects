@@ -41,12 +41,21 @@ void mouseWheel(MouseEvent event) {
 
 void mousePressed() {
     //creates a new object at the mouses current coordinaes
-    if (!userInterface.isMouseOver() && mouseButton == LEFT && checkInBounds()) {
+    if (!userInterface.isMouseOver() && mouseButton == LEFT && checkInBounds() && userInterface.getController(activeTab + " Generate Orbiting Planet").getValue() == 0) {
        // Adjust initial mouse position based on panning and zooming amount
         PVector currentMousePosition = getMouseWorldCoordinates();
         initialMousePosition.set(currentMousePosition.x, currentMousePosition.y);
         mousePressed = true;
         mouseReleased = false;
+    } else if(!userInterface.isMouseOver() && mouseButton == LEFT && checkInBounds() && userInterface.getController(activeTab + " Generate Orbiting Planet").getValue() == 1){
+        Body clickedBody = simulation.getClickedBody();
+        if(clickedBody != null) {
+            float orbitingBodyMass = int(userInterface.get(Textfield.class, activeTab + " Planet Mass").getText());
+            float orbitingBodyRadius = int(userInterface.get(Textfield.class, activeTab + " Planet Radius").getText());
+            float orbitingBodyDistance = int(userInterface.get(Textfield.class, activeTab + " Planet Distance").getText());
+
+            simulation.spawnOrbitingBody(clickedBody, orbitingBodyMass, orbitingBodyRadius, orbitingBodyDistance);
+        }
     }
 }
 
@@ -71,7 +80,7 @@ void mouseDragged() {
 }
 
 void mouseReleased() {
-    if (!userInterface.isMouseOver() && mouseButton != RIGHT && checkInBounds()) {
+    if (!userInterface.isMouseOver() && mouseButton != RIGHT && checkInBounds() && userInterface.getController(activeTab + " Generate Orbiting Planet").getValue() == 0) {
         //makes the final mouse position relative to the pan amount
         //finalMousePosition.set(mouseX - panX, mouseY - panY);
         

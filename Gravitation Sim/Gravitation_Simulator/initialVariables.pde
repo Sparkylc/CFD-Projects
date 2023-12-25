@@ -24,6 +24,8 @@ float oldZoom = 1;
 float zoomFactor = 1.1;
 float scale  = 1;
 
+Body pressedBody;
+
 int lockCount = 0;
 //declares a user interface object
 UserInterface userInterfaceController;;
