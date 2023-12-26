@@ -53,7 +53,7 @@
        PVector directionVector = PVector.sub(secondaryBodyPosition, primaryBodyPosition).normalize();
     
        //finds the direction vectors magnitude
-       float directionVectorMagnitude = directionVector.mag();
+       float directionVectorMagnitude = PVector.sub(secondaryBodyPosition, primaryBodyPosition).mag();
        
 
        //finds the resulting force vector, using the gravitation equation, minimum is the minimum distance I will treat as possible and will calculate something no lower than that
@@ -115,7 +115,7 @@
     Body orbitingBody = new Body(position, mass, radius);
 
    
-    float initialVelocity = sqrt(G*centralBody.mass / distance);
+    float initialVelocity = sqrt(G/1000000*centralBody.mass / distance);
     PVector unitDirectionVector = new PVector(0, 1);
           
     orbitingBody.previousPosition = PVector.sub(orbitingBody.position, PVector.mult(unitDirectionVector,initialVelocity));

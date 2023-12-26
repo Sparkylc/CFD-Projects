@@ -170,8 +170,8 @@ class UserInterface {
                                         .setPosition(globalInitialPositionX, globalInitialPositionY + globalGroupElementSpacingY * elementNumber)
                                         .setSize(200,20)
                                         .setLabel("Gravity Scale")
-                                        .setRange(1, 100)
-                                        .setValue(25)
+                                        .setRange(1, 10000000)
+                                        .setValue(5000000)
                                         .setGroup(controlsGroup)
                                         .onChange(new CallbackListener() {
                                                 void controlEvent(CallbackEvent theEvent) {
