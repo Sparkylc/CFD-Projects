@@ -35,6 +35,8 @@ class Vector {
      * @param b The other vector.
      * @return The resulting vector after the addition.
      */
+The `add` method in the `Vector` class is used to add the current vector to another vector.
+
     Vector add(Vector b){
         return new Vector(this.i + b.i, this.j + b.j, this.k + b.k);
     }
