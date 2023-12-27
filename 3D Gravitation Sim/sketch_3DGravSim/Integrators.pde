@@ -21,7 +21,7 @@ void addNewBody(Body body){
 }
 
 void RK4Position(Body body, float dt) {
-       PVector initialPosition = body.position;
+    PVector initialPosition = body.position;
     PVector initialVelocity = body.velocity;
 
     // k1 calculations
