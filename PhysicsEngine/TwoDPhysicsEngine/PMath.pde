@@ -1,6 +1,6 @@
-public class PMath {
+public static class PMath {
 
-  public static void(PVector point, float angleRad, PVector origin) {
+  public static void rotate(PVector point, float angleRad, PVector origin) {
     float x = point.x - origin.x;
     float y = point.y - origin.y;
 

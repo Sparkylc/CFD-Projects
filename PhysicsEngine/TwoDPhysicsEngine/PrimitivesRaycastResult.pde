@@ -19,7 +19,10 @@ public class RaycastResult {
     this.hit = hit; 
   }
 
-  public static void reset(RaycastResult result){
+
+  //TODO
+  /*
+  public void reset(RaycastResult result){
     if(result != null) {
       result.point.zero();
       result.normal.set(0,0);
@@ -27,4 +30,5 @@ public class RaycastResult {
       result.hit = false;
     }
   }
+  */
 } 

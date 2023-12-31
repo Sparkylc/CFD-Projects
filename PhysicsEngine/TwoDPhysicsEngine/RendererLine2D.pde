@@ -5,8 +5,8 @@ public class Line2D {
 
 
   public Line2D(PVector start, PVector end, color colour) {
-    this.start = start;
-    this.end = end;
+    this.start = start.copy();
+    this.end = end.copy();
     this.colour = colour;
   }
 
@@ -18,19 +18,19 @@ public class Line2D {
     return this.end;
   }
 
-  public PVector setStart(PVector start){
+  public void setStart(PVector start){
     this.start = start;
   }
 
-  public PVector setEnd(PVector end){
+  public void setEnd(PVector end){
     this.end = end;
   }
 
-  public PVector getColour(){
+  public color getColour(){
     return this.colour;
   }
 
-  public PVector setColour(color colour){
+  public void setColour(color colour){
     this.colour = colour;
   }
 

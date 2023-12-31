@@ -25,4 +25,13 @@ public class AABB{
     return PVector.add(this.rigidBody.getPosition(), this.halfSize);
 
   }
+
+  public void setRigidBody(RigidBody2D rigidBody){
+    this.rigidBody = rigidBody;
+  }
+
+  public void setSize(PVector size){
+    this.size.set(size);
+    this.halfSize.set(size.x / 2.0f, size.y / 2.0f);
+  }
 }

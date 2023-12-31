@@ -1,11 +1,11 @@
-public class IntersectionDetector2D {
+public static class IntersectionDetector2D {
   
 
   public static boolean pointOnLIne(PVector point, Line2D line){
     float dy = line.getEnd().y - line.getStart().y;
     float dx = line.getEnd().x - line.getStart().x;
     if(dx == 0f){
-      return PMath.compare(point, line.getStart().x);
+      return PMath.compare(point.x, line.getStart().x);
     }
     float slope = dy / dx;
 
@@ -34,8 +34,8 @@ public class IntersectionDetector2D {
 
     PVector localPoint = point.copy();
     PMath.rotate(localPoint, box.getRigidBody().getRotation(), box.getRigidBody().getPosition());
-    PVector min = box.getMin();
-    PVector max = box.getMax();
+    PVector min = box.getLocalMin();
+    PVector max = box.getLocalMax();
 
     return localPoint.x <= max.x && localPoint.x >= min.x && localPoint.y <= max.y && localPoint.y >= min.y;
 
@@ -50,7 +50,7 @@ public class IntersectionDetector2D {
 
     //Project point (circle position) ont ab (line segment)
     PVector circleCenter = circle.getCenter();
-    float t = PVector.dot(PVector.sub(circleCenter, line.getStart()), ab) / ab.dot(ab);
+    float t = PVector.dot(PVector.sub(circleCenter, line.getStart()), ab) / PVector.dot(ab, ab);
 
     if (t < 0.0f || t > 1.0f) {
       return false;
@@ -72,10 +72,10 @@ public class IntersectionDetector2D {
     unitVector.x = (unitVector.x != 0) ? 1.0f / unitVector.x : 0;
     unitVector.y = (unitVector.y != 0) ? 1.0f / unitVector.y : 0;
 
-    PVector min = box.getMin();
-    min.sub(line.getStart()).mult(unitVector);
-    PVector max = box.getMax();
-    max.sub(line.getStart()).mult(unitVector);
+    PVector min = box.getMin().copy();
+    min = min.sub(line.getStart()).mult(unitVector);
+    PVector max = box.getMax().copy();
+    max = max.sub(line.getStart()).mult(unitVector);
 
     float tmin = Math.max(Math.min(min.x, max.x), Math.min(min.y, max.y));
     float tmax = Math.min(Math.max(min.x, max.x), Math.max(min.y, max.y));
@@ -98,7 +98,7 @@ public class IntersectionDetector2D {
     PMath.rotate(localEnd, theta, center);
 
     Line2D localLine = new Line2D(localStart, localEnd);
-    AABB aabb = new AABB(box.getMin(), box.getMax());
+    AABB aabb = new AABB(box.getLocalMin().copy(), box.getLocalMax().copy());
 
     return lineAndAABB(localLine, aabb);
   }
@@ -174,7 +174,7 @@ public class IntersectionDetector2D {
   public static boolean raycast(OBB box, Ray2D ray, RaycastResult result) {
     RaycastResult.reset(result);
 
-    Vector size = box.getHalfSize();
+    PVector size = box.getHalfSize().copy();
 
     PVector xAxis = new PVector(1,0);
     PVector yAxis = new PVector(0,1);
@@ -222,6 +222,8 @@ public class IntersectionDetector2D {
         f.set(f.x, 0.00001f);
        }
        }
+
+
        tArr[i*2 + 0] = (l + s) / m; //tmax for this axis
        tArr[i*2 + 1] = (l - s) / m; //tmin for this axis    
     }
@@ -241,7 +243,176 @@ public class IntersectionDetector2D {
 
       result.init(point, normal, t, true);    
     }
-    return true
+    return true;
+  }
+  //overloaded method
+  public static boolean circleAndLine(Circle circle, Line2D line) {
+    return lineAndCircle(line, circle);
+  }
 
+  public static boolean circleAndCirlcle(Circle circle1, Circle circle2) {
+    PVector vectorBetweenCenters = PVector(circle1.getCenter(), circle2.getCenter());
+    float radiusSum = circle1.getRadius() + circle2.getRadius();
+    return vectorBetweenCenters.magSq() <= radiusSum * radiusSum;
+  }
+
+  public static boolean circleAndAABB (Circle circle, AABB box) {
+    PVector min = box.getMin();
+    PVector max = box.getMax();
+
+    PVector closestPointToCircle = circle.getCenter().copy();
+    if(closestPointToCircle.x < min.x) {
+      closestPointToCircle.x = min.x;
+    } else if(closestPointToCircle.x > max.x) {
+      closestPointToCircle.x = max.x;
+    }
+    //clamps to closest piece of the box to the center
+    if(closestPointToCircle.y < min.y) {
+      closestPointToCircle.y = min.y;
+    } else if(closestPointToCircle.y > max.y) {
+      closestPointToCircle.y = max.y;
+    }
+
+    PVector circleToBox = PVector.sub(circle.getCenter(), closestPointToCircle);
+    return circleToBox.magSq() <= circle.getRadius() * circle.getRadius();
+  }
+
+  public static circleAndOBB (Circle circle, OBB box) {
+    //Treat the box just like an AABB after we rotate the stuff
+    PVector min = new PVector();
+    PVector max = PVector.mult(box.getHalfSize(), 2.0f);
+
+    //Create a circle in boxes local space
+    PVector r = new PVector(PVector.sub(circle.getCenter(), box.getRigidBody().getPosition()));
+    PMath.rotate(r, -1 * box.getRigidBody().getRotation(), new PVector(0,0));
+    PVector localCirclePosition = PVector.add(r, box.getHalfSize());
+
+    PVector closestPointToCircle = localCirclePosition.copy();
+    if(closestPointToCircle.x < min.x) {
+      closestPointToCircle.x = min.x;
+    } else if(closestPointToCircle.x > max.x) {
+      closestPointToCircle.x = max.x;
+    }
+    //clamps to closest piece of the box to the center
+    if(closestPointToCircle.y < min.y) {
+      closestPointToCircle.y = min.y;
+    } else if(closestPointToCircle.y > max.y) {
+      closestPointToCircle.y = max.y;
+    }
+
+    PVector circleToBox = PVector.sub(localCirclePosition, closestPointToCircle);
+    return circleToBox.magSq() <= circle.getRadius() * circle.getRadius();
+    
+  }
+  //overloaded method
+  public static boolean AABBAndCircle(AABB box, Circle circle) {
+    return circleAndAABB(circle, box);
+  }
+
+  public static boolean AABBAndAABB(AABB box1, AABB box2){
+    //axis aligned means (1,0) and (0,1)
+     PVector[] axisToTest = {
+      new PVector(0,1),
+      new PVector(1, 0) 
+     };
+
+     for(int i = 0; i < axisToTest.length; i++) {
+      if(!overlapOnAxis(box1, box2, axisToTest[i])) {
+        return false;
+      }
+     }
+      return true;
+  }
+
+  public static boolean AABBAndOBB(AABB box1, OBB box2){
+    PVector[] axesToTest = {
+      new PVector(0, 1),
+      new PVector(1, 0),
+      new PVector(0, 1),
+      new PVector(1, 0)
+      };
+      PMath.rotate(axesToTest[2], box2.getRigidBody().getRotation(), new PVector(0,0));
+      PMath.rotate(axesToTest[3], box2.getRigidBody().getRotation(), new PVector(0,0));
+      
+      for(int i = 0; i < axisToTest.length; i++) {
+      if(!overlapOnAxis(box1, box2, axisToTest[i])) {
+        return false;
+      }
+     }
+      return true;
+  }
+
+
+
+  //================================================================================================
+  //========================================SAT HELPER METHODS======================================
+  //================================================================================================
+
+  private static boolean overlapOnAxis(AABB box1, AABB box2, PVector axis) {
+    //it is expected for the user to make sure that axis is normalized before passing in 
+    PVector interval1 = getInterval(box1, axis);
+    PVector interval2 = getInterval(box2, axis);
+    return (interval2.x <= interval1.y) && (interval1.x <= interval2.y);
+  } 
+  private static boolean overlapOnAxis(AABB box1, OBB box2, PVector axis) {
+    //it is expected for the user to make sure that axis is normalized before passing in 
+    PVector interval1 = getInterval(box1, axis);
+    PVector interval2 = getInterval(box2, axis);
+    return (interval2.x <= interval1.y) && (interval1.x <= interval2.y);
+  } 
+  private static boolean overlapOnAxis(OBB box1, OBB box2, PVector axis) {
+    //it is expected for the user to make sure that axis is normalized before passing in 
+    PVector interval1 = getInterval(box1, axis);
+    PVector interval2 = getInterval(box2, axis);
+    return (interval2.x <= interval1.y) && (interval1.x <= interval2.y);
+  } 
+
+  private static PVector getInterval(AABB rectangle, PVector axis) {
+    PVector result = new PVector(0, 0);
+
+    PVector min = rectangle.getMin().copy();
+    PVector max = rectangle.getMax().copy();
+
+    PVector[] vertices = {
+      new PVector(min.x, min.y),
+      new PVector(max.x, min.y),
+      new PVector(max.x, max.y),
+      new PVector(min.x, max.y)
+    };
+
+
+    result.x = PVector.dot(axis, vertices[0]);
+    result.y = result.x;
+
+    for(int i = 1; i < vertices.length; i++) {
+      float projection = PVector.dot(axis, vertices[i]);
+      if(projection < result.x) {
+        result.x = projection;
+      }
+      if(projection > result.y) {
+        result.y = projection;
+      }
+    }
+    return result;
+  }
+
+  private static PVector getInterval(OBB rectangle, PVector axis) {
+    PVector result = new PVector(0, 0);
+    PVector[] vertices = rectangle.getVertices();
+
+
+    result.x = PVector.dot(axis, vertices[0]);
+    result.y = result.x;
+
+    for(int i = 1; i < vertices.length; i++) {
+      float projection = PVector.dot(axis, vertices[i]);
+      if(projection < result.x) {
+        result.x = projection;
+      }
+      if(projection > result.y) {
+        result.y = projection;
+      }
+    }
+    return result;
   }
 }
