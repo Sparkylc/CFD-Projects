@@ -1,10 +1,11 @@
 public class Friction implements ForceRegistry {
-  
+
+  private Rigidbody rigidbody;
+  private float u; //coefficient of friction
+
   @Override
   public PVector getForce(Rigidbody rigidbody, PVector position) {
-    //frictional force is equal too
-    //F_friction = -1 * u * |F_normal| * ^v^
-    //where v is a unit vector of the velocity
+    this.rigidbody = rigidbody;
 
     PVector friction;
     PVector rigidbodyVelocity = rigidbody.getVelocity().copy();
@@ -16,10 +17,16 @@ public class Friction implements ForceRegistry {
     //etc. For now, this will just be equal to the mass of the object
     
     float normalForce = rigidbody.getMass();
-    float u = 0.4f; //coefficient of friction
     friction = rigidbodyVelocity.mult(-1 * u * normalForce);
     return friction;
   }
 
+  @Override
+  public void draw(){
+    //do nothing
+  }
 
+  public void setCoefficientOfFriction(float u){
+    this.u = u;
+  }
 }

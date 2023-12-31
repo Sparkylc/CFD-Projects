@@ -1,0 +1,44 @@
+
+
+public class AddForce {
+
+
+    public void AddRopeForceToRigidBody(Rigidbody rigidbody, PVector ropeOrigin, float ropeLength, float ropeRigidity, float ropeRigidityMultiplier, float ropeDampeningMultiplier){
+        Rope ADD_FORCE_ROPE = new Rope();
+        ADD_FORCE_ROPE.setOrigin(ropeOrigin);
+        ADD_FORCE_ROPE.setLength(ropeLength);
+        ADD_FORCE_ROPE.setRigidity(ropeRigidity);
+        ADD_FORCE_ROPE.setRopeDampeningMultiplier(ropeDampeningMultiplier);
+        ADD_FORCE_ROPE.setRopeRigidityMultiplier(ropeRigidityMultiplier);
+        rigidbody.addForce(ADD_FORCE_ROPE);
+    }
+
+    public void AddAirReistanceForceToRigidBody(Rigidbody rigidbody) {
+        AirResistance ADD_FORCE_AIR_RESISTANCE = new AirResistance();
+        rigidbody.addForce(ADD_FORCE_AIR_RESISTANCE);
+    }
+
+    public void AddFollowMouseForceToRigidBody(Rigidbody rigidbody) {
+        FollowMouse ADD_FORCE_FOLLOW_MOUSE = new FollowMouse();
+        rigidbody.addForce(ADD_FORCE_FOLLOW_MOUSE);
+    }
+    public void AddFrictionForceToRigidBody(Rigidbody rigidbody, float coefficientOfFriction) {
+        Friction ADD_FORCE_FOLLOW_MOUSE = new Friction();
+        ADD_FORCE_FOLLOW_MOUSE.setCoefficientOfFriction(coefficientOfFriction);
+        rigidbody.addForce(ADD_FORCE_FOLLOW_MOUSE);
+    }
+    public void AddGravityForceToRigidBody(Rigidbody rigidbody, PVector grav) {
+        Gravity ADD_FORCE_GRAVITY = new Gravity();
+        ADD_FORCE_GRAVITY.setGravity(grav);
+        rigidbody.addForce(ADD_FORCE_GRAVITY);
+    }
+
+    //TODO: IMPLEMENT CUSTOM SPRING EQUILIBRIUM POSITIONS
+    public void AddSpringForceToRigidBody(Rigidbody rigidbody, PVector springAnchor, float springConstant, float springLength) {
+        Spring ADD_FORCE_SPRING = new Spring();
+        ADD_FORCE_SPRING.setSpringAnchor(springAnchor);
+        ADD_FORCE_SPRING.setSpringConstant(springConstant);
+        ADD_FORCE_SPRING.setSpringLength(springLength);
+        rigidbody.addForce(ADD_FORCE_SPRING);
+    }
+}

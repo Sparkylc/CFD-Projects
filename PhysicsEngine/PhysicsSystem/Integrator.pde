@@ -46,14 +46,4 @@ public PVector calculateAcceleration(Rigidbody rigidbody, PVector position){
   }
   return PVector.div(netForce, rigidbody.getMass());
 }
-
-
-
-
-
-
-
-
-
-
 }
