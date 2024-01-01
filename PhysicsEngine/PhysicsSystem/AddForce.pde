@@ -35,10 +35,21 @@ public class AddForce {
 
     //TODO: IMPLEMENT CUSTOM SPRING EQUILIBRIUM POSITIONS
     public void AddSpringForceToRigidBody(Rigidbody rigidbody, PVector springAnchor, float springConstant, float springLength) {
-        Spring ADD_FORCE_SPRING = new Spring();
+        RigidbodySpring ADD_FORCE_SPRING = new RigidbodySpring();
         ADD_FORCE_SPRING.setSpringAnchor(springAnchor);
         ADD_FORCE_SPRING.setSpringConstant(springConstant);
         ADD_FORCE_SPRING.setSpringLength(springLength);
         rigidbody.addForce(ADD_FORCE_SPRING);
     }
+
+    public void AddSpringForceToSpringForce(Rigidbody rigidbody, Rigidbody secondarySpring, float springConstant, float springLength) {
+        RigidbodySpring ADD_FORCE_SPRING = new RigidbodySpring();
+        ADD_FORCE_SPRING.setSpringAnchor(secondarySpring);
+        ADD_FORCE_SPRING.setSpringConstant(springConstant);
+        ADD_FORCE_SPRING.setSpringLength(springLength);
+        rigidbody.addForce(ADD_FORCE_SPRING);
+    }
+
+
+\
 }

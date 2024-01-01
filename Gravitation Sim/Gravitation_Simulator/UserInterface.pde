@@ -44,7 +44,7 @@ class UserInterface {
 
 
         //variables for the line  
-        int pathLength = 1000;
+        int pathLength = 5000;
         float[] xvals = new float[pathLength];
         float[] yvals = new float[pathLength];
 

@@ -2,6 +2,7 @@ public class Rigidbody {
   private PVector position;
   private PVector velocity;
   private float angularVelocity;
+  private boolean isVisible = true;
 
 
   //dimensional variables
@@ -36,6 +37,9 @@ public class Rigidbody {
     this.end = this.position;
     this.velocity = velocity;
     this.rigidbodyIntegrator = rigidbodyIntegrator;
+    // default initialization of a circle
+    this.radius = 10.0f;
+    this.mass = 10.0f;
   }
 
   public void draw(){
@@ -311,6 +315,14 @@ public class Rigidbody {
 
   public float getAngle(){
     return this.angle;
+  }
+
+  public void setVisibility(boolean isVisible){
+    this.isVisible = isVisible;
+  }
+
+  public boolean getVisibility(){
+    return this.isVisible;
   }
 
   

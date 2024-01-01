@@ -1,4 +1,4 @@
-public class Spring implements ForceRegistry {
+public class RigidbodySpring implements ForceRegistry {
   private Rigidbody rigidbody;
   private PVector anchorPoint = new PVector(0,0);
 
@@ -69,6 +69,10 @@ public class Spring implements ForceRegistry {
 
   public void setSpringAnchor(PVector anchorPoint) {
     this.anchorPoint = anchorPoint;
+  }
+
+  public void setSpringAnchor(Rigidbody rigidbody) {
+    this.anchorPoint = rigidbody.getPosition();
   }
 
 public void setSpringLength(float springLength) {
