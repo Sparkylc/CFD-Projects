@@ -2,32 +2,48 @@ public class Rigidbody {
   private PVector position;
   private PVector velocity;
   private float angularVelocity;
+
+  //variables for rendering
   private boolean isVisible = true;
+  private boolean isForceVisible = true;
+  private String shapeType = "circle"; //String to define what type of shape it is for other calculations like moment of inertia, drag coefficient, etc.
 
 
   //dimensional variables
   private float mass = 5.0f;
+  private float density = 1.0f;
   private float width;
   private float height;
   private float radius;
+  private PVector[] vertices;
+
+  //variables for interactivity controls
+  private boolean isMouseInteractive;
+  private boolean isCurrentlyMouseInteractive;
+  private boolean isSimulationPaused;
+
 
   //For lines, ropes and springs
   //the end of the line/rope/spring will be the current position of the rigidbody
   private PVector start;
   private PVector end;
   private float angle;
+
+  //Variables for properties of the rigidbody
+  private boolean isStatic = false;
+  private boolean isCollidable = false;
+ 
   
 
-  private float density = 1.0f;
-  private PVector[] vertices;
 
-  //String to define what type of shape it is for other calculations like
-  //moment of inertia, drag coefficient, etc.
-  private String shapeType = "circle";
+
 
   private ShapeRenderer shapeRenderer = new ShapeRenderer(this);
   private Integrator rigidbodyIntegrator;
+
+  //ForceRegistry to store all the external forces acting on the rigidbody
   private ArrayList<ForceRegistry> forceRegistry = new ArrayList<ForceRegistry>();
+
   private CollisionDetection collisionDetection = new CollisionDetection();
 
 
@@ -36,6 +52,10 @@ public class Rigidbody {
     this.position = position;
     this.end = this.position;
     this.velocity = velocity;
+
+    this.isVisible = true;
+    this.isMouseInteractive = true;
+
     this.rigidbodyIntegrator = rigidbodyIntegrator;
     // default initialization of a circle
     this.radius = 10.0f;
@@ -43,11 +63,34 @@ public class Rigidbody {
   }
 
   public void draw(){
-    rigidbodyIntegrator.RK4Position(this, PhysicsWorld.DT);
-    collisionDetection.edgeCollision(this);
-    shapeRenderer.render();
-     for(ForceRegistry force : forceRegistry) {
-      force.draw();
+    if(!isStatic) {
+      if(!this.isCurrentlyMouseInteractive && this.isVisible && !PhysicsWorld.IS_SIMULATION_PAUSED) {
+      rigidbodyIntegrator.RK4Position(this, PhysicsWorld.DT);
+      }
+      if(this.isCollidable) {
+        collisionDetection.edgeCollision(this);
+      }
+      if(this.isVisible){
+        shapeRenderer.render();
+      }
+      if(this.isForceVisible) {
+        for(ForceRegistry force : forceRegistry) {
+          force.draw();
+        }
+      }
+    }
+    if(isStatic){
+      if(this.isVisible){
+        shapeRenderer.render();
+      }
+      if(this.isCollidable) {
+        collisionDetection.edgeCollision(this);
+      }
+      if(this.isForceVisible) {
+        for(ForceRegistry force : forceRegistry) {
+          force.draw();
+        }
+      }
     }
   }
 
@@ -325,5 +368,52 @@ public class Rigidbody {
     return this.isVisible;
   }
 
-  
+  public void setIsForceVisible(boolean isForceVisible){
+    this.isForceVisible = isForceVisible;
+  }
+
+  public boolean getIsForceVisible(){
+    return this.isForceVisible;
+  }
+
+  public void setIsStatic(boolean isStatic){
+    this.isStatic = isStatic;
+  }
+
+  public boolean getIsStatic(){
+    return this.isStatic;
+  }
+
+  public void setIsCollidable(boolean isCollidable){
+    this.isCollidable = isCollidable;
+  }
+
+  public boolean getIsCollidable(){
+    return this.isCollidable;
+  }
+
+
+
+
+  /*
+  ======================================================================================================
+  ========================================== MOUSE INTERACTIVITY =======================================
+  ======================================================================================================
+  */
+  public void OnMouseClick() {
+    if(this.isMouseInteractive && PVector.dist(new PVector(mouseX, mouseY), this.position) < this.radius){
+        this.isCurrentlyMouseInteractive = !this.isCurrentlyMouseInteractive;
+    }
+  }
+
+  public void OnMouseMove() {
+    if(this.isMouseInteractive && this.isCurrentlyMouseInteractive){
+      this.position.x = mouseX;
+      this.position.y = mouseY;
+    }
+  }
+
+  public void setMouseInteractive(boolean isMouseInteractive){
+    this.isMouseInteractive = isMouseInteractive;
+  }
 }

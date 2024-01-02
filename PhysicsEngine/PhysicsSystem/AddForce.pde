@@ -2,17 +2,6 @@
 
 public class AddForce {
 
-
-    public void AddRopeForceToRigidBody(Rigidbody rigidbody, PVector ropeOrigin, float ropeLength, float ropeRigidity, float ropeRigidityMultiplier, float ropeDampeningMultiplier){
-        Rope ADD_FORCE_ROPE = new Rope();
-        ADD_FORCE_ROPE.setOrigin(ropeOrigin);
-        ADD_FORCE_ROPE.setLength(ropeLength);
-        ADD_FORCE_ROPE.setRigidity(ropeRigidity);
-        ADD_FORCE_ROPE.setRopeDampeningMultiplier(ropeDampeningMultiplier);
-        ADD_FORCE_ROPE.setRopeRigidityMultiplier(ropeRigidityMultiplier);
-        rigidbody.addForce(ADD_FORCE_ROPE);
-    }
-
     public void AddAirReistanceForceToRigidBody(Rigidbody rigidbody) {
         AirResistance ADD_FORCE_AIR_RESISTANCE = new AirResistance();
         rigidbody.addForce(ADD_FORCE_AIR_RESISTANCE);
@@ -44,12 +33,40 @@ public class AddForce {
 
     public void AddSpringForceToSpringForce(Rigidbody rigidbody, Rigidbody secondarySpring, float springConstant, float springLength) {
         RigidbodySpring ADD_FORCE_SPRING = new RigidbodySpring();
-        ADD_FORCE_SPRING.setSpringAnchor(secondarySpring);
+        RigidbodySpring ADD_FORCE_SPRING_SECONDARY = new RigidbodySpring();
+
+        ADD_FORCE_SPRING.setConnectedToSpring(true);
+        ADD_FORCE_SPRING.setAnchorRigidBody(secondarySpring);
         ADD_FORCE_SPRING.setSpringConstant(springConstant);
         ADD_FORCE_SPRING.setSpringLength(springLength);
+        ADD_FORCE_SPRING.setSpringVisible(true);
+
+        ADD_FORCE_SPRING_SECONDARY.setConnectedToSpring(true);
+        ADD_FORCE_SPRING_SECONDARY.setAnchorRigidBody(rigidbody);
+        ADD_FORCE_SPRING_SECONDARY.setSpringConstant(springConstant);
+        ADD_FORCE_SPRING_SECONDARY.setSpringLength(springLength);
+        ADD_FORCE_SPRING_SECONDARY.setSpringVisible(false);
+
         rigidbody.addForce(ADD_FORCE_SPRING);
+        secondarySpring.addForce(ADD_FORCE_SPRING_SECONDARY);
+
+
     }
 
+    public void AddRigidRodForceToRigidBody(Rigidbody rigidbody, PVector anchorPoint, float length, float stiffness) {
+        RigidbodyRod ADD_FORCE_ROD = new RigidbodyRod();
+        ADD_FORCE_ROD.setAnchorPoint(anchorPoint);
+        ADD_FORCE_ROD.setLength(length);
+        ADD_FORCE_ROD.setStiffness(stiffness);
+        rigidbody.addForce(ADD_FORCE_ROD);
+    }
 
-\
+    public void AddRigidRodForceToRigidBody(Rigidbody rigidbody, Rigidbody anchorBody, float length, float stiffness) {
+        RigidbodyRod ADD_FORCE_ROD = new RigidbodyRod();
+        ADD_FORCE_ROD.setAnchorRigidbody(anchorBody);
+        ADD_FORCE_ROD.setLength(length);
+        ADD_FORCE_ROD.setStiffness(stiffness);
+        ADD_FORCE_ROD.setConnectedToRigidbody(true);
+        rigidbody.addForce(ADD_FORCE_ROD);
+    }
 }

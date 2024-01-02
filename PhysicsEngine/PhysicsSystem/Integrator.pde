@@ -8,6 +8,7 @@ The Runga Kutta Order 4 method is as follows:
 
 public class Integrator{
 
+//For normal force functions that are not velocity dependent
 public void RK4Position(Rigidbody rigidbody, float dt) {
     PVector initialPosition = rigidbody.getPosition().copy();
     PVector initialVelocity = rigidbody.getVelocity().copy();
@@ -45,5 +46,6 @@ public PVector calculateAcceleration(Rigidbody rigidbody, PVector position){
       netForce.add(force.getForce(rigidbody, position));
   }
   return PVector.div(netForce, rigidbody.getMass());
-}
+  }
+
 }

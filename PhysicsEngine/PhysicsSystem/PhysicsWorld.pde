@@ -8,6 +8,7 @@ public static class PhysicsWorld {
   public static final float ROPE_RIGIDITY_MULTIPLIER = 50;
   public static final float ROPE_DAMPENING_MULTIPLIER = 0.5f;
   public static final float DT = 0.01f;
+  public static boolean IS_SIMULATION_PAUSED = false;
 
   public static final String[][] shapeTypeVariables = 
   //ShapeType, Drag Coefficient

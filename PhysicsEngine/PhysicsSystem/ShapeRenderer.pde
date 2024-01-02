@@ -28,29 +28,36 @@ public class ShapeRenderer {
     }
 
     private void drawCircle(){
+      fill(255);
       ellipseMode(RADIUS);
       ellipse(rigidbody.getPosition().x, rigidbody.getPosition().y, rigidbody.getRadius(), rigidbody.getRadius());
     }
 
     private void drawSquare(){
+      fill(255);
       rectMode(CENTER);
       rect(rigidbody.getX(), rigidbody.getY(), rigidbody.getWidth(), rigidbody.getHeight());
     }
 
     private void drawRectangle(){
+      fill(255);
       rectMode(CENTER);
       rect(rigidbody.getX(), rigidbody.getY(), rigidbody.getWidth(), rigidbody.getHeight());
     }
 
     private void drawTriangle(){
+    fill(255);
     PVector[]vertices = rigidbody.getVertices();
     triangle(vertices[0].x, vertices[0].y, vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y);
     }
 
     private void drawSpring(){
+
+      ellipse(rigidbody.getStart().x, rigidbody.getStart().y, 10, 10);
       //TODO: IS ANCHOR POINT BETTER THAN GET START, CHECK NAMING CONVENTIONS AND PLAN HOW YOU WANT
       //TO DO THIS 
       PVector direction = PVector.sub(rigidbody.getPosition(), rigidbody.getStart());
+
       float length = direction.mag();
       direction.normalize();
 
@@ -70,9 +77,12 @@ public class ShapeRenderer {
         }
         line(segmentStart.x, segmentStart.y, segmentEnd.x, segmentEnd.y);
       }
+
+      ellipse(rigidbody.getPosition().x, rigidbody.getPosition().y, 10, 10);
     }
 
     private void drawLine(){
+      fill(255);
       line(rigidbody.getStart().x, rigidbody.getStart().y, rigidbody.getEnd().x, rigidbody.getEnd().y);
     }
 
@@ -86,4 +96,5 @@ public class ShapeRenderer {
       }
       endShape(CLOSE);
     }
+
 }

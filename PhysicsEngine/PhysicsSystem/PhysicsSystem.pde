@@ -1,7 +1,11 @@
 
 Rigidbody rigidbody = new Rigidbody(new PVector(500, 500), new PVector(0, 0), new Integrator());
-Rigidbody springRigidBody = new Rigidbody(new PVector(500,700), new PVector(0, 0), new Integrator());
+Rigidbody springRigidbody = new Rigidbody(new PVector(500,600), new PVector(0, 0), new Integrator());
 AddForce addForce = new AddForce();
+
+ArrayList<Rigidbody> rigidbodyArrayList = new ArrayList<Rigidbody>();
+
+//Rigidbody test = new Rigidbody(new PVector(500, 500), new PVector(0, 0), new Integrator());
 
 
 void setup(){
@@ -10,21 +14,42 @@ void setup(){
   //rigidbody.addForce(new Friction());
 
 
-  rigidbody.setRadius(50);
+  rigidbody.setRadius(10);
   rigidbody.setMass(10);
-  rigidbody.setPosition(400, 600);
+  rigidbody.setPosition(400, 400);
+  rigidbody.setVisibility(true);
+  rigidbody.setMouseInteractive(true);
+  rigidbodyArrayList.add(rigidbody);
 
-  springRigidBody.setRadius(5);
-  springRigidBody.setMass(1);
-  springRigidBody.setPosition(400, 700);
+  springRigidbody.setRadius(10);
+  springRigidbody.setMass(10);
+  springRigidbody.setPosition(400, 500);
+  springRigidbody.setVisibility(true);
+  springRigidbody.setMouseInteractive(true);
+  rigidbodyArrayList.add(springRigidbody);
+
+
+
+
+
+  //test.setRadius(50);
+  //test.setMass(10);
+  //test.setPosition(600, 600);
 
   //rigidbody.setVelocity(10,0);
 
-  //addForce.AddGravityForceToRigidBody(rigidbody, PhysicsWorld.GRAVITY);
+  addForce.AddGravityForceToRigidBody(rigidbody, PhysicsWorld.GRAVITY);
+  addForce.AddGravityForceToRigidBody(springRigidbody, PhysicsWorld.GRAVITY);
   //addForce.AddFollowMouseForceToRigidBody(rigidbody);
   //addForce.AddGravityForceToRigidBody(rigidbody, PhysicsWorld.GRAVITY);
-  addForce.AddSpringForceToRigidBody(rigidbody, new PVector(400, 500), 10.0f, 300);
-  addForce.AddSpringForceToSpringForce(springRigidBody, rigidbody, 10.0f, 300);
+
+
+  //addForce.AddSpringForceToRigidBody(springRigidbody, new PVector(400, 300), 20.0f, 10);
+ //addForce.AddSpringForceToRigidBody(springRigidbody, new PVector(300, 400), 20.0f, 10);
+  //addForce.AddSpringForceToRigidBody(rigidbody, new PVector(500, 400), 20.0f, 10);
+  addForce.AddSpringForceToSpringForce(springRigidbody, rigidbody, 20.0f, 10);
+
+  addForce.AddRigidRodForceToRigidBody(rigidbody, new PVector(400, 300), 100, 100);
 
   //rigidbody.addForce(new AirResistance());
 
@@ -34,10 +59,10 @@ void setup(){
 
 void draw(){
   background(16, 18, 19);
-  MouseEvent.mouseX = mouseX;
-  MouseEvent.mouseY = mouseY;
   rigidbody.draw();
-  springRigidBody.draw();
+  springRigidbody.draw();
+  System.out.println(rigidbody.getPosition());
+  //springRigidbody.draw();
 
   
 

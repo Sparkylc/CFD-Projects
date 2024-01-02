@@ -6,7 +6,7 @@ public class FollowMouse implements ForceRegistry {
   public PVector getForce(Rigidbody rigidbody, PVector position) {
     if(mousePressed) {
     this.rigidbody = rigidbody;
-    PVector mouse = new PVector(MouseEvent.mouseX, MouseEvent.mouseY);
+    PVector mouse = new PVector(mouseX, mouseY);
     PVector rigidbodyPosition = rigidbody.getPosition().copy();
     PVector direction = PVector.sub(mouse, position);
     direction.normalize();
