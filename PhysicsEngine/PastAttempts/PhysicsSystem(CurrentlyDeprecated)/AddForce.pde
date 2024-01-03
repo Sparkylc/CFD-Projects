@@ -69,4 +69,13 @@ public class AddForce {
         ADD_FORCE_ROD.setConnectedToRigidbody(true);
         rigidbody.addForce(ADD_FORCE_ROD);
     }
+
+    public void AddRigidRodForceToPointOnRigidBody(Rigidbody rigidbody, Rigidbody anchorBody, float length, float stiffness) {
+        RigidbodyRod ADD_FORCE_ROD = new RigidbodyRod();
+        ADD_FORCE_ROD.setAnchorRigidbody(anchorBody);
+        ADD_FORCE_ROD.setConnectedToRigidbody(true);
+        ADD_FORCE_ROD.setLength(length);
+        ADD_FORCE_ROD.setStiffness(stiffness);
+        rigidbody.addForce(ADD_FORCE_ROD);
+    }
 }

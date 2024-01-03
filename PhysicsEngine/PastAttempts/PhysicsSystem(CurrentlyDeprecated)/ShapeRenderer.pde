@@ -1,5 +1,7 @@
 public class ShapeRenderer {
-    private Rigidbody rigidBody;
+    public Rigidbody rigidBody;
+
+
     public ShapeRenderer(Rigidbody rigidBody){
         this.rigidBody = rigidBody;
     }

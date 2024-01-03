@@ -3,10 +3,12 @@ public class RigidbodyRod implements ForceRegistry {
     private float stiffness;
     private PVector anchorPoint;
     private Rigidbody rigidbody;
+    private Integrator integrator = new Integrator();
 
 
     private Rigidbody anchorRigidbody;
     private boolean connectedToRigidbody;
+    private boolean isRotating = true;
 
 
     @Override
@@ -14,6 +16,11 @@ public PVector getForce(Rigidbody rigidbody, PVector position) {
     this.rigidbody = rigidbody;
     if(connectedToRigidbody){
         anchorPoint = anchorRigidbody.getPosition();
+    }
+    if(isRotating){
+        anchorRigidbody.getAngularPosition();
+        anchorRigidbody.getAngularVelocity();
+        anchorPoint = integrator.angularPositionIntegrator(anchorRigidbody, 50.0f, PhysicsWorld.DT);
     }
     float rodLength = length;
     float rodStiffness = stiffness;

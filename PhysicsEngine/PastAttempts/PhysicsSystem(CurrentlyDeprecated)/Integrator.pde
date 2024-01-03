@@ -7,6 +7,10 @@ The Runga Kutta Order 4 method is as follows:
 */
 
 public class Integrator{
+  private Rigidbody rigidbody;
+public Integrator(Rigidbody rigidbody) {
+  this.rigidbody = rigidbody;
+}
 
 //For normal force functions that are not velocity dependent
 public void RK4Position(Rigidbody rigidbody, float dt) {
@@ -38,6 +42,29 @@ public void RK4Position(Rigidbody rigidbody, float dt) {
     rigidbody.setVelocity(finalVelocity);
 }
 
+//simple solver for angular position and velocity before I figure this shit out, this just assumes
+//im calculating the angular position of an object a certain distance R away from the center
+public PVector angularPositionIntegrator(Rigidbody rigidbody, float r, float dt) {
+    PVector centerPosition = rigidbody.getPosition().copy();
+
+    float angularPosition = rigidbody.getAngularPosition();
+    float angularVelocity = rigidbody.getAngularVelocity();
+    float angularAcceleration = rigidbody.getAngularAcceleration();
+
+    float newAngularVelocity = angularVelocity + angularAcceleration * dt;
+    float newAngularPosition = angularPosition + newAngularVelocity * dt;
+
+    // Calculate the new position based on the new angular position
+    float newX = centerPosition.x + r * cos(newAngularPosition);
+    float newY = centerPosition.y + r * sin(newAngularPosition);
+    PVector newPosition = new PVector(newX, newY);
+
+    // Update the rigidbody's angular position, angular velocity, and position
+    rigidbody.setAngularPosition(newAngularPosition);
+    rigidbody.setAngularVelocity(newAngularVelocity);
+    return newPosition;
+}
+
 //for in house acceleration calculations
 public PVector calculateAcceleration(Rigidbody rigidbody, PVector position){
   ArrayList<ForceRegistry> forceRegistry = rigidbody.getForceRegistry();
@@ -47,5 +74,9 @@ public PVector calculateAcceleration(Rigidbody rigidbody, PVector position){
   }
   return PVector.div(netForce, rigidbody.getMass());
   }
+
+public float calculateAngularAcceleration(Rigidbody rigidbody) {
+  return 0;
+}
 
 }

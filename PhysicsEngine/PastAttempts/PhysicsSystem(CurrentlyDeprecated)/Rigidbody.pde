@@ -1,7 +1,12 @@
 public class Rigidbody {
   private PVector position;
   private PVector velocity;
+
+
+  //The angular analogs for this simulation are a bit sketchy at best, so take them with a grain of salt
+  private float angularPosition; //in radians
   private float angularVelocity;
+  private float angularAcceleration;
 
   //variables for rendering
   private boolean isVisible = true;
@@ -31,7 +36,7 @@ public class Rigidbody {
 
   //Variables for properties of the rigidbody
   private boolean isStatic = false;
-  private boolean isCollidable = false;
+  private boolean isCollidable = true;
  
   
 
@@ -39,7 +44,7 @@ public class Rigidbody {
 
 
   private ShapeRenderer shapeRenderer = new ShapeRenderer(this);
-  private Integrator rigidbodyIntegrator;
+  private Integrator rigidbodyIntegrator = new Integrator(this);
 
   //ForceRegistry to store all the external forces acting on the rigidbody
   private ArrayList<ForceRegistry> forceRegistry = new ArrayList<ForceRegistry>();
@@ -48,15 +53,13 @@ public class Rigidbody {
 
 
 
-  public Rigidbody(PVector position, PVector velocity, Integrator rigidbodyIntegrator) {
-    this.position = position;
-    this.end = this.position;
-    this.velocity = velocity;
+  public Rigidbody(PVector position, PVector velocity) {
+    this.position = position.copy();
+    this.end = this.position.copy();
+    this.velocity = velocity.copy();
 
     this.isVisible = true;
     this.isMouseInteractive = true;
-
-    this.rigidbodyIntegrator = rigidbodyIntegrator;
     // default initialization of a circle
     this.radius = 10.0f;
     this.mass = 10.0f;
@@ -201,14 +204,6 @@ public class Rigidbody {
     } else {
     this.mass = mass;
     }
-  }
-
-  public float getAngularVelocity() {
-    return this.angularVelocity;
-  }
-
-  public void setAngularVelocity(float angularVelocity) {
-    this.angularVelocity = angularVelocity;
   }
 
   public float getWidth() {
@@ -390,6 +385,30 @@ public class Rigidbody {
 
   public boolean getIsCollidable(){
     return this.isCollidable;
+  }
+
+  public void setAngularPosition(float angularPosition){
+    this.angularPosition = angularPosition;
+  }
+
+  public float getAngularPosition(){
+    return this.angularPosition;
+  }
+
+  public void setAngularAcceleration(float angularAcceleration){
+    this.angularAcceleration = angularAcceleration;
+  }
+
+  public float getAngularAcceleration(){
+    return this.angularAcceleration;
+  }
+
+  public void setAngularVelocity(float angularVelocity){
+    this.angularVelocity = angularVelocity;
+  }
+
+  public float getAngularVelocity(){
+    return this.angularVelocity;
   }
 
 
