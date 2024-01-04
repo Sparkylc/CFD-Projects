@@ -1,3 +1,18 @@
 {
-    "docwriter.style": "Javadoc"
+    "docwriter.style": "Javadoc",
+    "externalFormatters.languages": {
+      "java": {
+          "command": "java",
+          "arguments": [
+              "-jar",
+              "/Applications/Visual Studio Code.app/google-java-format-1.19.1-all-deps.jar",
+              "-"
+          ]
+      }
+  },
+  "[java]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "SteefH.external-formatters"
+  },
 }
+

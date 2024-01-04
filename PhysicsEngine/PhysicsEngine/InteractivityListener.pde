@@ -1,3 +1,5 @@
+Rigidbody movingRigidbody;
+
 public class InteractivityListener {
   PVector position;
   float zoom;
@@ -63,3 +65,36 @@ public void mouseMoved(){
     rigidbody.updateMouseInteraction();
   }
 }
+
+int currentObject = 0;
+
+public void keyPressed(){
+  if(keyCode >= 0 && keyCode <= 9){
+    currentObject = keyCode;
+  } 
+  if(key == 'w'){
+      rigidbodyArrayList.get(currentObject).Move(new PVector(0, -10f));
+      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
+  }
+  if(key == 's'){
+      rigidbodyArrayList.get(currentObject).Move(new PVector(0, 10f));
+      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
+  }
+  if(key == 'a'){
+      rigidbodyArrayList.get(currentObject).Move(new PVector(-10f, 0));
+      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
+  }
+  if(key == 'd'){
+      rigidbodyArrayList.get(currentObject).Move(new PVector(10f, 0));
+      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
+  }
+  if(keyCode == LEFT) {
+    rigidbodyArrayList.get(currentObject).Rotate(-0.1f);
+    rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
+  }
+  if(keyCode == RIGHT) {
+    rigidbodyArrayList.get(currentObject).Rotate(0.1f);
+    rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
+  }
+}
+

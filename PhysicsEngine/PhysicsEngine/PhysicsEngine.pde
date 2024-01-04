@@ -1,40 +1,44 @@
-public static ArrayList<Rigidbody> rigidbodyArrayList;
-Rigidbody rigidbodyGenerator = new Rigidbody();
 
-//THIS MUST BE KEPT AS THIS NAME AS THE CLASS REQUIRES THIS NAME
-InteractivityListener interactivityListener;
-
-void setup(){
+void setup() {
   size(1000, 1000);
   frameRate(240);
-  rigidbodyArrayList = new ArrayList<Rigidbody>();
+    rigidbodyArrayList = new ArrayList<Rigidbody>();
   interactivityListener = new InteractivityListener();
-
+  
   int bodyCount = 10;
-
-  for(int i = 0; i < bodyCount; i++){
-
+  int type = 0;
+  
+  for (int i = 0; i < bodyCount; i++) {
+    
     float padding = 20.0f;
-
-
+    type = (int)random(0, 2);
+      
+      
     Rigidbody rigidbody = null;
-
-
-    float x = random(padding, width-padding);
+    
+    
+    float x = random(padding, width - padding);
     float y = random(padding, height - padding);
 
-    rigidbody = rigidbodyGenerator.CreateBoxBody(30f, new PVector(x, y), 0.5f, 0.5f, true, true, true, 5f, new PVector(0,0,0), new PVector(255, 255, 255));
+    
+    
+    if (type == 0) {
+      rigidbody = rigidbodyGenerator.CreateCircleBody(20f, new PVector(x, y), 0.5f, 0.5f, true, true, true, 5f, new PVector(0,0,0), new PVector(255, 255, 255));
+    } else{
+      rigidbody = rigidbodyGenerator.CreateBoxBody(30f, 20f, new PVector(x, y), 0.5f, 0.5f, true, true, true, 5f, new PVector(0,0,0), new PVector(255, 255, 255));
+    }
     rigidbodyArrayList.add(rigidbody);
   }
 }
 
-
-void draw(){
+float rotationCount = 0;
+void draw() {
   background(16, 18, 19);
   interactivityListener.applyTransform();
-  for(Rigidbody rigidbody : rigidbodyArrayList){
+  for (Rigidbody rigidbody : rigidbodyArrayList) {
+    //rigidbody.Rotate(radians(rotationCount*0.01));
     rigidbody.draw();
   }
-  Collisions.collisionResponse();
+  Step(0.01);
   interactivityListener.resetTransform();
 }
