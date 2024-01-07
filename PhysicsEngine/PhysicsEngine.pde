@@ -2,9 +2,11 @@
 float[] cameraExtents;
 
 
+int lastFrameTime;
 
 void setup() {
 
+  lastFrameTime = millis();
   size(1000, 1000);
   windowMove(10, 4);
   frameRate(240);
@@ -37,44 +39,26 @@ void setup() {
   AddBodyToBodyEntityList(slantedFloor1);
   AddBodyToBodyEntityList(slantedFloor2);
   AddBodyToBodyEntityList(floor);
-  //TIMING UTILITIES
 }
 
 
-//TIMING UTILITIES
 
-double totalStepTime;
-double subStepTime;
-int bodyCount;
 
 void draw() {
 
-
+  int currentFrameTime = millis();
   background(16, 18, 19);
-  //Applies the camera transform
   interactivityListener.applyTransform();
-  //Draws the rigidbodies
+  
   render.draw();
-
-  Step(0.01, 64);
+  float dt = (currentFrameTime - lastFrameTime) / 1000f;
+  Step(dt, 20);
 
   interactivityListener.resetTransform();
-
-    //TIMING UTILITIES
-  if(millis() - systemTime>= 200) {
-    totalStepTime = ((totalWorldStepTime/1000) / totalSampleCount);
-    subStepTime = ((subWorldStepTime/1000) / subSampleCount);
-    bodyCount = rigidbodyList.size();
-
-    //updates the counter and resets values
-    totalWorldStepTime = 0;
-    subWorldStepTime = 0;
-    totalSampleCount = 0;
-    subSampleCount = 0;
-    systemTime = millis();
-    }
-  
-  text("Total Step Time: " + totalStepTime + "\u03BCs", 10, 20);
-  text("Sub Step Time: " + subStepTime + "\u03BCs", 10, 40);
-  text("Body Count: " + bodyCount, 10, 60);
+  displayTimings();
+/*------------------------------------Timing Utilities--------------------------------------------*/
+ lastFrameTime = currentFrameTime;
 }
+
+
+

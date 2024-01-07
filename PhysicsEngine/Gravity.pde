@@ -2,7 +2,7 @@ public class Gravity implements ForceRegistry {
   private Rigidbody rigidbody;
   
   @Override
-  public PVector getForce(Rigidbody rigidbody, PVector position) {\
+  public PVector getForce(Rigidbody rigidbody, PVector position) {
     this.rigidbody = rigidbody;
 
 
