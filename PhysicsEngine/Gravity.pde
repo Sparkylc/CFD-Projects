@@ -8,7 +8,6 @@ public class Gravity implements ForceRegistry {
 
     return PVector.mult(GRAVITY_VECTOR, rigidbody.getMass());
   }
-
   @Override
   public void draw() {
     // do nothing
