@@ -5,8 +5,8 @@ public class InteractivityListener {
   float zoom;
 
   public InteractivityListener() {
-    position = new PVector(0, 0);
-    zoom = 24f;
+    position = new PVector(0, -50);
+    zoom = 10f;
   }
 
   public void zoom(float amount, float mouseX, float mouseY) {
@@ -65,7 +65,7 @@ public PVector[] getWorldBoundsWithPadding(float padding) {
 }
 
 public void mouseWheel(MouseEvent event) {
-    float e = event.getCount();
+    float e = -event.getCount();
     interactivityListener.zoom(pow(1.1f, e), mouseX, mouseY);
 }
 
@@ -74,41 +74,49 @@ public void mouseDragged() {
 }
 
 public void mouseClicked() {
-  for(Rigidbody rigidbody : rigidbodyArrayList) {
+  for(Rigidbody rigidbody : rigidbodyList) {
     rigidbody.mouseInteraction();
   }
     if(mouseButton == LEFT) {
-    float width = random(0, 10);
-    float height = random(0, 10);
+
+    float width = random(2, 8);
+    float height = random(2, 8);
     float rotation = random(0, 3);
+
     Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody(width, height, 
-                                                interactivityListener.screenToWorld(mouseX, mouseY), 
-                                               0.5f, 0.5f, false, true,
-                                                   true, 0.25, new PVector(0, 0, 0),
-                                                   new PVector(255, 255, 255));
+                                                           0.5f, 0.5f, 
+                                                           false, true,
+                                                           true, 0.25, 
+                                                           new PVector(0, 0, 0), 
+                                                           new PVector(255, 255, 255));
+
+
+    rigidbody.SetInitialPosition(interactivityListener.screenToWorld(mouseX, mouseY));
+
     //rigidbody.Rotate(rotation);
     rigidbody.addForceToForceRegistry(new Gravity());
-    rigidbodyArrayList.add(rigidbody);
+    AddBodyToBodyEntityList(rigidbody);
   
   }
   if(mouseButton == RIGHT) {
-    float radius = random(0, 3);
-    Rigidbody rigidbody = RigidbodyGenerator.CreateCircleBody(radius, 
-                                                interactivityListener.screenToWorld(mouseX, mouseY), 
-                                               0.5f, 0.5f, false, true,
-                                                   true, 0.25, new PVector(0, 0, 0),
-                                                   new PVector(255, 255, 255));
-      rigidbody.addForceToForceRegistry(new Gravity());
-    rigidbodyArrayList.add(rigidbody);                          
+
+    float radius = random(1, 3);
+
+    Rigidbody rigidbody = RigidbodyGenerator.CreateCircleBody(radius, 0.5f, 0.5f, 
+                                                              false, true, true, 
+                                                              0.25, new PVector(0, 0, 0),
+                                                              new PVector(255, 255, 255));
+    rigidbody.SetInitialPosition(interactivityListener.screenToWorld(mouseX, mouseY));
+
+
+    
+    rigidbody.addForceToForceRegistry(new Gravity());
+    AddBodyToBodyEntityList(rigidbody);                     
 
   }
 }
 
-public void mouseMoved(){
-  for(Rigidbody rigidbody : rigidbodyArrayList) {
-    rigidbody.updateMouseInteraction();
-  }
-}
+
 
 
 

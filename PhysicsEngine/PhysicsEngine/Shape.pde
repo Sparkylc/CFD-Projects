@@ -1,20 +1,38 @@
 public class Shape {
-  Rigidbody rigidbody;
   
-  public Shape(Rigidbody rigidbody) {
-    this.rigidbody = rigidbody;
+  public Shape() {
   }
   
   public void draw() {
-    if (rigidbody.getShapeType() == ShapeType.CIRCLE) {
-      drawCircle(rigidbody.getPosition(), rigidbody.getRadius(), rigidbody.getStrokeWeight(), rigidbody.getFillColour(), rigidbody.getStrokeColour());
-    }
-    if (rigidbody.getShapeType() == ShapeType.BOX) {
-      //drawBox(rigidbody.getPosition(), rigidbody.getWidth(), rigidbody.getHeight(), rigidbody.getStrokeWeight(), rigidbody.getFillColour(), rigidbody.getStrokeColour());
-      drawPolygon(rigidbody.getPosition(), rigidbody.GetTransformedVertices(), rigidbody.getStrokeWeight(), rigidbody.getFillColour(), rigidbody.getStrokeColour());
+    drawRigidbodies();
+    drawAABB();
+    drawCollisionPoints();
   }
+/*
+====================================================================================================
+==================================-=== Drawing Methods =============================================
+====================================================================================================
+*/
+  public void drawRigidbodies() {
+    for(int body = 0; body < rigidbodyList.size(); body++) {
+
+      Rigidbody rigidbody = rigidbodyList.get(body);
+        if(rigidbody.getIsVisible()) {
+          
+          if (rigidbody.getShapeType() == ShapeType.CIRCLE) {
+            drawCircle(rigidbody.getPosition(), rigidbody.getRadius(), 
+                       rigidbody.getStrokeWeight(), rigidbody.getFillColour(), 
+                       rigidbody.getStrokeColour());
+          }
+
+          if (rigidbody.getShapeType() == ShapeType.BOX) {
+            drawPolygon(rigidbody.getPosition(), rigidbody.GetTransformedVertices(), 
+                        rigidbody.getStrokeWeight(), rigidbody.getFillColour(), 
+                        rigidbody.getStrokeColour());
+          }
+        }
+      }
   }
-  
   public void drawCircle(PVector position, float radius, float strokeWeight, PVector fillColour, 
     PVector strokeColour) {
     
@@ -26,14 +44,16 @@ public class Shape {
     ellipse(position.x, position.y,  diameter,  diameter);
   }
   
-  public void drawBox(PVector position, float width, float height, float strokeWeight, 
+  public void drawBox(PVector position, float width, float height, float angle, float strokeWeight, 
     PVector fillColour, PVector strokeColour) {
     
     fill(fillColour.x, fillColour.y, fillColour.z);
     stroke(strokeColour.x, strokeColour.y, strokeColour.z);
     strokeWeight(strokeWeight);
     rectMode(CENTER);
+    pushMatrix();
     rect(position.x, position.y, width, height);
+    popMatrix();
   }
   
   public void drawPolygon(PVector position, PVector[] transformedVertices, float strokeWeight, 
@@ -48,4 +68,30 @@ public class Shape {
     }
     endShape(CLOSE);
   }
+
+  public void drawAABB() {
+    for(Rigidbody rigidbody : rigidbodyList) {
+      if(rigidbody.getIsVisible()) {
+        AABB aabb = rigidbody.GetAABB();
+        rectMode(CORNERS);
+        stroke(255, 0, 0);
+        noFill();
+        rect(aabb.getMin().x, aabb.getMin().y, aabb.getMax().x, aabb.getMax().y);
+      }
+    }
+  }
+
+  public void drawCollisionPoints() {
+    if(showCollisionPoints) {
+      for(PVector point : pointsOfContact) {
+        stroke(0, 0, 0);
+        strokeWeight(0.1f);
+        noFill();
+        rectMode(CENTER);
+        rect(point.x, point.y, 1, 1);
+      }
+    }
+  }
+
+
 }

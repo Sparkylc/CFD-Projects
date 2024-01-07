@@ -22,7 +22,6 @@ public class Rigidbody {
 
   private PVector[] Vertices;
   private AABB aabb;
-  public int[] Triangles;
   private PVector[] transformedVertices;
 
 
@@ -35,6 +34,7 @@ public class Rigidbody {
   private boolean aabbUpdateRequired; 
   
   private boolean isStatic;
+  private boolean isVisible;
   private boolean isCollidable;
   private boolean isMouseInteractive;
   private boolean isSelected;
@@ -62,12 +62,16 @@ public class Rigidbody {
   }
   
   private Rigidbody(float density, float mass, float rotationalIntertia, float restitution, 
-    float area, float radius, float width, float height, boolean isStatic,
+    float area, float radius, float width, float height, PVector[] vertices, boolean isStatic,
     boolean isCollidable, boolean isMouseInteractive, float strokeWeight,
     PVector strokeColour, PVector fillColour, ShapeType shapeType)
   {
     this.Mass = mass;
     this.RotationalInertia = rotationalIntertia;
+    this.InvMass = mass > 0 ? 1 / mass : 0;
+    this.InvRotationalInertia = rotationalIntertia > 0 ? 1 / rotationalIntertia : 0;
+
+
     this.Density = density;
     this.Restitution = restitution;
     this.Area = area;
@@ -77,8 +81,6 @@ public class Rigidbody {
   
 
     this.ShapeType = shapeType;
-
-    this.shapeRenderer = new Shape(this);
     this.strokeWeight = strokeWeight;
     this.strokeColour = strokeColour;
     this.fillColour = fillColour;
@@ -87,6 +89,8 @@ public class Rigidbody {
     this.isStatic = isStatic;
     this.isCollidable = isCollidable;
     this.isMouseInteractive = isMouseInteractive;
+    this.isVisible = true;
+
   
 
     this.position = new PVector();
@@ -97,8 +101,7 @@ public class Rigidbody {
     
     if (shapeType == ShapeType.BOX) {
 
-      this.Vertices = CreateBoxVertices(this.Width, this.Height);
-      this.Triangles = CreateBoxTriangles();
+      this.Vertices = vertices;
       this.transformedVertices = new PVector[this.Vertices.length];
       this.aabb = this.GetAABB();
       
@@ -106,18 +109,10 @@ public class Rigidbody {
 
       this.Vertices = null;
       this.transformedVertices = null;
-      this.Triangles = null;
     }
     
     //Sets InvMass for static objects to 0
-    if (this.isStatic) {
-      this.InvMass = 0;
-      this.InvRotationalInertia = 0;
 
-    } else {
-      this.InvMass = 1 / Mass;
-      this.InvRotationalInertia = 1 / RotationalInertia;
-    }
     
     this.aabbUpdateRequired = true;
     this.transformUpdateRequired = true;
@@ -143,19 +138,7 @@ public class Rigidbody {
     vertices[3] = new PVector(left, bottom);
     return vertices;
   }
-  
-  private int[] CreateBoxTriangles() {
-    int[] triangles = new int[6];
-    triangles[0] = 0;
-    triangles[1] = 1;
-    triangles[2] = 2;
-    triangles[3] = 0;
-    triangles[4] = 2;
-    triangles[5] = 3; 
 
-    return triangles;
-    
-  }
   
   public PVector[] GetTransformedVertices() {
     if (this.transformUpdateRequired) {
@@ -212,10 +195,22 @@ public class Rigidbody {
     
     //Clamps restitution between 0 and 1
     restitution = PhysEngMath.Clamp(restitution, 0, 1);
+
+
+    float mass = 0f;
+    float rotationalIntertia = 0f;
+
+    if(!isStatic) {
+      //calculates mass from density and area
+      mass = area * density;
+      rotationalIntertia =  0.5f * mass * radius * radius;
+    }
     
-    float mass = area * density;
-    
-    rigidbody = new Rigidbody(density, mass, restitution, area, radius, 0, 0, isStatic, isCollidable, isMouseInteractive, strokeWeight, strokeColour, fillColour, ShapeType.CIRCLE);
+
+
+    rigidbody = new Rigidbody(density, mass, rotationalIntertia, restitution, area, radius, 0, 0, 
+                              null, isStatic, isCollidable, isMouseInteractive, strokeWeight, 
+                              strokeColour, fillColour, ShapeType.CIRCLE);
     
     System.out.println("Rigidbody created with mass: " + mass + " and area: " + area);
     return rigidbody;
@@ -251,9 +246,19 @@ public class Rigidbody {
     restitution = PhysEngMath.Clamp(restitution, 0, 1);
     
     //calculates mass from density and area
-    float mass = area * density;
+    float mass = 0f;
+    float rotationalIntertia = 0f;
+
+    if(!isStatic) {
+      mass = area * density;
+      rotationalIntertia = 0.5f * mass * width * width + height * height;
+    }
+
+    PVector[] vertices = CreateBoxVertices(width, height);
     
-    rigidbody = new Rigidbody(density, mass, restitution, area, 0, width, height, isStatic, isCollidable, isMouseInteractive, strokeWeight, strokeColour, fillColour, ShapeType.BOX);
+    rigidbody = new Rigidbody(density, mass, rotationalIntertia, restitution, area, 0, width, 
+                              height, vertices, isStatic, isCollidable, isMouseInteractive, 
+                              strokeWeight, strokeColour, fillColour, ShapeType.BOX);
     
     System.out.println("Rigidbody created with mass: " + mass + " and area: " + area);
     
@@ -301,38 +306,9 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
 
   /*
   ==================================================================================================
-  ==================================MOMENT OF INTERTIA==============================================
-  ==================================================================================================
-  */
-  private float CalculateMomentOfIntertia() {
-    if(this.ShapeType == ShapeType.CIRCLE) {
-      return 0.5f * this.Mass * this.Radius * this.Radius;
-
-    } else if(this.ShapeType == ShapeType.BOX) {
-      return 0.5f * this.Mass * (this.Width * this.Width + this.Height * this.Height);
-    } else {
-      return 0;
-    }
-  }
-
-  /*
-  ==================================================================================================
   ==================================METHODS=========================================================
   ==================================================================================================
-  */
-  
-  public void draw() {
-    shapeRenderer.draw();
-  }
-  public void drawAABB() {
-  this.GetAABB();
-  rectMode(CORNERS);
-  stroke(255, 0, 0);
-  noFill();
-  rect(this.aabb.getMin().x, this.aabb.getMin().y, this.aabb.getMax().x, this.aabb.getMax().y);
-  }
-  
-  
+  */  
   public void Move(PVector amount) {
     this.position.add(amount);
 
@@ -369,7 +345,7 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
   }
   
   public void mouseInteraction() {
-    if (this.IsMouseInteractive) {
+    if (this.isMouseInteractive) {
       if (PVector.sub(interactivityListener.screenToWorld(mouseX, mouseY), this.position).magSq() <= this.Radius * this.Radius) {
         this.isSelected = !this.isSelected;
 
@@ -459,7 +435,7 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
     }
     return PVector.div(netForce, this.Mass);
     
-    //return PVector.mult(GRAVITY_VECTOR, this.Mass / this.Mass);
+ 
   }
   
   /*
@@ -506,15 +482,11 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
   }
   
   public boolean getIsMouseInteractive() {
-    return this.IsMouseInteractive;
+    return this.isMouseInteractive;
   }
   
   public PVector[] getVertices() {
     return this.Vertices;
-  }
-  
-  public int[] getTriangles() {
-    return this.Triangles;
   }
   
   public float getInvMass() {
@@ -528,6 +500,11 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
   public float getInvRotationalInertia() {
     return this.InvRotationalInertia;
   }
+
+  public float getAngle() {
+    return this.angle;
+  }
+
   
   /*
   ==================================================================================================
@@ -632,4 +609,13 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
   public void setIsStatic(boolean isStatic) {
     this.isStatic = isStatic;
   }
+
+  public boolean getIsVisible() {
+    return this.isVisible;
+  }
+
+  public void setIsVisible(boolean isVisible) {
+    this.isVisible = isVisible;
+  }
+  
 }

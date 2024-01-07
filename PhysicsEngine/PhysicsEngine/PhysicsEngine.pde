@@ -6,31 +6,37 @@ float[] cameraExtents;
 void setup() {
 
   size(1000, 1000);
+  windowMove(10, 4);
   frameRate(240);
 
-  rigidbodyArrayList = new ArrayList<Rigidbody>();
+  rigidbodyList = new ArrayList<Rigidbody>();
   interactivityListener = new InteractivityListener();
 
+  Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody()
+  Rigidbody floor = RigidbodyGenerator.CreateBoxBody(width/2f,
+                                                   3f, 1f, 1f, true, true,
+                                                   true, 0.25, new PVector(0, 0, 0),
+                                                   new PVector(255, 255, 255));
+  floor.SetInitialPosition(new PVector(0, -10));
 
-  Rigidbody floor = RigidbodyGenerator.CreateBoxBody(width/2,
-                                                   3, new PVector(0, -10), 1f, 1f, true, true,
+  Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(50f,
+                                                   3f, 1f, 1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
-  Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(50,
-                                                   3, new PVector(-20, -50), 1f, 1f, true, true,
+  slantedFloor1.SetInitialPosition(new PVector(-20, -50));
+
+   Rigidbody slantedFloor2 = RigidbodyGenerator.CreateBoxBody(50f,
+                                                   3f, 1f, 1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
-   Rigidbody slantedFloor2 = RigidbodyGenerator.CreateBoxBody(50,
-                                                   3, new PVector(20, -70), 1f, 1f, true, true,
-                                                   true, 0.25, new PVector(0, 0, 0),
-                                                   new PVector(255, 255, 255));
+  slantedFloor2.SetInitialPosition(new PVector(20, -70));
   
   slantedFloor1.Rotate(PI/6);
   slantedFloor2.Rotate(-PI/6);
 
-  rigidbodyArrayList.add(slantedFloor1);
-  rigidbodyArrayList.add(slantedFloor2);
-  rigidbodyArrayList.add(floor);
+  AddBodyToBodyEntityList(slantedFloor1);
+  AddBodyToBodyEntityList(slantedFloor2);
+  AddBodyToBodyEntityList(floor);
   //TIMING UTILITIES
 }
 
@@ -47,18 +53,8 @@ void draw() {
   background(16, 18, 19);
   //Applies the camera transform
   interactivityListener.applyTransform();
-
-  for (Rigidbody rigidbody : rigidbodyArrayList) {
-    rigidbody.draw();
-    rigidbody.drawAABB();
-  }
-  for(PVector point : pointsOfContact) {
-    stroke(0, 0, 0);
-    strokeWeight(0.1f);
-    noFill();
-    rectMode(CENTER);
-    rect(point.x, point.y, 1, 1);
-  }
+  //Draws the rigidbodies
+  render.draw();
 
   Step(0.01, 64);
 
@@ -68,7 +64,7 @@ void draw() {
   if(millis() - systemTime>= 200) {
     totalStepTime = ((totalWorldStepTime/1000) / totalSampleCount);
     subStepTime = ((subWorldStepTime/1000) / subSampleCount);
-    bodyCount = rigidbodyArrayList.size();
+    bodyCount = rigidbodyList.size();
 
     //updates the counter and resets values
     totalWorldStepTime = 0;

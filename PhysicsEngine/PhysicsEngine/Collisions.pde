@@ -82,13 +82,15 @@ public static void FindCollisionPoints(Rigidbody rigidbodyA, Rigidbody rigidbody
 if(shapeTypeA == ShapeType.BOX) {
 
       if(shapeTypeB == ShapeType.BOX) {
-        pointsOfContact = FindCollisionPoints(rigidbodyA.GetTransformedVertices(), 
-                                              rigidbodyB.GetTransformedVertices());
+        pointsOfContact = FindPolygonsCollisionPoints(rigidbodyA.GetTransformedVertices(), 
+                                                      rigidbodyB.GetTransformedVertices());
 
       } else if(shapeTypeB == ShapeType.CIRCLE) {
 
-          pointsOfContact = FindCollisionPoint(rigidbodyB.getPosition(), rigidbodyB.getRadius(),
-                                               rigidbodyA.getPosition(), rigidbodyA.GetTransformedVertices());
+          pointsOfContact = FindCirclePolygonCollisionPoint(rigidbodyB.getPosition(),
+                                                            rigidbodyB.getRadius(),
+                                                            rigidbodyA.getPosition(), 
+                                                            rigidbodyA.GetTransformedVertices());
       }
 
     }
@@ -96,16 +98,18 @@ if(shapeTypeA == ShapeType.BOX) {
         
         if(shapeTypeB == ShapeType.BOX) {
           
-          pointsOfContact = FindCollisionPoint(rigidbodyA.getPosition(), rigidbodyA.getRadius(),
-                                               rigidbodyB.getPosition(), rigidbodyB.GetTransformedVertices());
+          pointsOfContact = FindCirclePolygonCollisionPoint(rigidbodyA.getPosition(), 
+                                                            rigidbodyA.getRadius(),
+                                                            rigidbodyB.getPosition(), 
+                                                            rigidbodyB.GetTransformedVertices());
 
 
         } else if(shapeTypeB == ShapeType.CIRCLE) {
 
-          pointsOfContact = FindCollisionPoint(rigidbodyA.getPosition(),  
-                                               rigidbodyA.getRadius(), 
-                                               rigidbodyB.getPosition(),
-                                               rigidbodyB.getRadius());
+          pointsOfContact = FindCirclesCollisionPoint(rigidbodyA.getPosition(),  
+                                                      rigidbodyA.getRadius(), 
+                                                      rigidbodyB.getPosition(),
+                                                      rigidbodyB.getRadius());
         }
       }
 
@@ -119,8 +123,8 @@ if(shapeTypeA == ShapeType.BOX) {
 ======================================= COLLISION-RESULT ===========================================
 ====================================================================================================
 */
- private static PVector[] FindCollisionPoint(PVector centerA, float radiusA, 
-                                             PVector centerB, float radiusB) {
+ private static PVector[] FindCirclesCollisionPoint(PVector centerA, float radiusA, 
+                                                         PVector centerB, float radiusB) {
 
     PVector direction = PVector.sub(centerB, centerA).normalize();
     PVector collisionPoint = PVector.add(centerA, PVector.mult(direction, radiusA));
@@ -132,8 +136,8 @@ if(shapeTypeA == ShapeType.BOX) {
 ======================================= COLLISION-RESULT ===========================================
 ====================================================================================================
 */
-private static PVector[] FindCollisionPoints(PVector[] transformedVerticesA, 
-                                             PVector[] transformedVerticesB) {
+private static PVector[] FindPolygonsCollisionPoints(PVector[] transformedVerticesA, 
+                                                           PVector[] transformedVerticesB) {
   
   PVector[] pointsOfContact = new PVector[0];
   PVector contactPointA = new PVector();
@@ -208,9 +212,11 @@ private static PVector[] FindCollisionPoints(PVector[] transformedVerticesA,
 ====================================================================================================
 */
 
-private static PVector[] FindCollisionPoint(PVector circleCenter, float circleRadius,
-                                            PVector polygonCenter, PVector[] transformedVertices) {
-    //This is required as there is no enclosing instance of physics class for collisionResult
+private static PVector[] FindCirclePolygonCollisionPoint(PVector circleCenter, 
+                                                         float circleRadius,
+                                                         PVector polygonCenter, 
+                                                         PVector[] transformedVertices) {
+
     float minDistanceSquared = Float.MAX_VALUE;
     PVector contactPoint = new PVector();
 
@@ -237,10 +243,13 @@ private static PVector[] FindCollisionPoint(PVector circleCenter, float circleRa
 ====================================================================================================
 */
 public static boolean IntersectAABB (AABB aabbA, AABB aabbB) {
+
   if(aabbA.getMax().x <= aabbB.getMin().x || aabbB.getMax().x <= aabbA.getMin().x
     || aabbA.getMax().y <= aabbB.getMin().y || aabbB.getMax().y <= aabbA.getMin().y) {
+
     return false;
   }
+
   return true;
 }
 /*
@@ -250,7 +259,7 @@ public static boolean IntersectAABB (AABB aabbA, AABB aabbB) {
 ====================================================================================================
 */
   public static CollisionResult IntersectCircle(PVector centerA, PVector centerB, 
-                                             float radiusA, float radiusB) {
+                                                float radiusA, float radiusB) {
 
     boolean isColliding;
     PVector normal = new PVector();

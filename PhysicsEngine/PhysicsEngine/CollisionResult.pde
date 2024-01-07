@@ -17,7 +17,9 @@ public class CollisionResult {
 ================================ PointSegmentDistance Constructor ==================================
 ====================================================================================================
 */
+
   public CollisionResult(float distanceSquared, PVector pointOfContact) {
+
 
     this.distanceSquared = distanceSquared;
 

@@ -33,6 +33,7 @@ public static class PhysEngMath {
   
   
   public static PVector Transform(PVector vertex, PVector position, float angle) {
+    Transform
     //Gives you the position of the vertex (which will always centered around 0,0)
     float positionX = vertex.x;
     float positionY = vertex.y;
@@ -82,6 +83,6 @@ public static class PhysEngMath {
   }
 
   public static boolean Equals(PVector a, PVector b) {
-    return Equals(a.x, b.x) && Equals(a.y, b.y);
+    return PVector.sub(a, b).magSq() < precision * precision; //magSq is faster than mag
   }
 }

@@ -1,5 +1,4 @@
-  
-  //TIME KEEPING AND PERFOMANCE DEBUGGING STUFF
+  /*------------------------Related to Timekeeping Debugging --------------------------------------*/
   public long totalWorldStepTime;
   public long subWorldStepTime;
 
@@ -8,22 +7,29 @@
 
   public int totalSampleCount;
   public int subSampleCount;
+/*----------------------------------------------------------------------------------------------*/
 
 
 
 
-
-  //===================================================================================================
-  
+/*
+====================================================================================================
+===================================  PHYSICS ENGINE CONSTANTS  =====================================
+====================================================================================================
+*/
   public Rigidbody RigidbodyGenerator = new Rigidbody();
   public InteractivityListener interactivityListener = new InteractivityListener();
+  public Shape render = new Shape();
 
-  int aabbCollsionCount = 0;
 
-  public ArrayList<Rigidbody> rigidbodyArrayList = new ArrayList<Rigidbody>();
+  public ArrayList<Rigidbody> rigidbodyList = new ArrayList<Rigidbody>();
   public ArrayList<CollisionManifold> collisionManifoldArrayList = new ArrayList<CollisionManifold>();
-  public ArrayList<PVector> pointsOfContact = new ArrayList<PVector>();
 
+
+  /*---------------------------------Points of Contact Debugging --------------------------------- 
+    public boolean showCollisionPoints = true;
+    public ArrayList<PVector> pointsOfContact = new ArrayList<PVector>();
+  ---------------------------------------------------------------------------------------------- */
 
   public final float MIN_BODY_AREA = 0.01f * 0.01f; // m^2
   public final float MAX_BODY_AREA = 300f * 300f; // m^2
@@ -34,65 +40,49 @@
   public final int MIN_ITERATIONS = 1;
   public final int MAX_ITERATIONS = 128;
 
+
   public final PVector GRAVITY_VECTOR = new PVector(0, 9.81f, 0);
   public final float GRAVITY_MAG = 9.81f;
 
-  public void AddBody(Rigidbody body) {
-    rigidbodyArrayList.add(body);
-  }
 
-  public void RemoveBody(Rigidbody body) {
-    rigidbodyArrayList.remove(body);
-  }
-
-  public void ClearBodies() {
-    rigidbodyArrayList.clear();
-  }
-
-  public void RemoveBody(int index) {
-    if(index < 0 || index >= rigidbodyArrayList.size()){
-      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + rigidbodyArrayList.size());
-    }
-    rigidbodyArrayList.remove(index);
-  }
-
-  public Rigidbody getBody(int index) {
-    if(index < 0 || index >= rigidbodyArrayList.size()){
-      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + rigidbodyArrayList.size());
-    }
-    return rigidbodyArrayList.get(index);
-  }
 
   //Iterations for substeps for each frame
-  public void Step(float dt, int iterations) {
-    //TIMEKEEPING
-    long totalWorldStepTimeStart = System.nanoTime();
-
-    iterations = PhysEngMath.Clamp(iterations, MIN_ITERATIONS, MAX_ITERATIONS);
-
-    this.pointsOfContact.clear();
-
-  for(int it = 0; it < iterations; it++) {
-    //TIMEKEEPING
-    long subWorldStepTimeStart = System.nanoTime();
+  public void Step(float dt, int totalIterations) {
 
 
-    for(Rigidbody rigidbody : rigidbodyArrayList) {
-      rigidbody.update(dt, iterations);
+/*-----------------Related to Timekeeping Debugging -----------------*/
+      long totalWorldStepTimeStart = System.nanoTime();
+/*-------------------------------------------------------------------*/
+
+/* ------------------------Points of Contact Debugging Variable-------------------------------------
+      this.pointsOfContact.clear();
+/* ----------------------------------------------------- */
+
+    totalIterations = PhysEngMath.Clamp(totalIterations, MIN_ITERATIONS, MAX_ITERATIONS);
+
+  for(int currentIteration = 0; currentIteration < totalIterations; currentIteration++) {
+
+    /*-----------------Related to Timekeeping Debugging -----------------*/
+      long subWorldStepTimeStart = System.nanoTime();
+    /*-------------------------------------------------------------------*/
+
+
+    for(Rigidbody rigidbody : rigidbodyList) {
+      rigidbody.update(dt, totalIterations);
     }
 
     this.collisionManifoldArrayList.clear();
 
-    for(int i = 0; i < rigidbodyArrayList.size() - 1; i++) {
+    for(int i = 0; i < rigidbodyList.size() - 1; i++) {
 
-      Rigidbody rigidbodyA = rigidbodyArrayList.get(i);
+      Rigidbody rigidbodyA = rigidbodyList.get(i);
       AABB rigidbodyA_AABB = rigidbodyA.GetAABB();
 
 
 
-      for(int j = i + 1; j < rigidbodyArrayList.size(); j++) {
+      for(int j = i + 1; j < rigidbodyList.size(); j++) {
 
-        Rigidbody rigidbodyB = rigidbodyArrayList.get(j);
+        Rigidbody rigidbodyB = rigidbodyList.get(j);
         AABB rigidbodyB_AABB = rigidbodyB.GetAABB();
 
 
@@ -105,22 +95,15 @@
           continue;
         } 
         
+
+        //The result of the collision which holds the collision values
         CollisionResult collisionResult = Collisions.Collide(rigidbodyA, rigidbodyB);
 
         if(collisionResult.getIsColliding()) {
-          if(rigidbodyA.getIsStatic()) {
 
-            rigidbodyB.Move(PVector.mult(collisionResult.getNormal(),collisionResult.getDepth()));
+          PVector minimumTranslationVector = PVector.mult(collisionResult.getNormal(), collisionResult.getDepth());
 
-          } else if (rigidbodyB.getIsStatic()) {
-
-            rigidbodyA.Move(PVector.mult(collisionResult.getNormal(),-collisionResult.getDepth()));
-
-          } else {
-
-            rigidbodyA.Move(PVector.mult(collisionResult.getNormal(),-collisionResult.getDepth() / 2));
-            rigidbodyB.Move(PVector.mult(collisionResult.getNormal(),collisionResult.getDepth() / 2));  
-          }
+          SeperateBodies(rigidbodyA, rigidbodyB, minimumTranslationVector);
 
           Collisions.FindCollisionPoints(rigidbodyA, rigidbodyB, collisionResult);
 
@@ -131,37 +114,63 @@
         }
       }
     }
-  for(int i = 0; i < this.collisionManifoldArrayList.size(); i++)
-  {
-    CollisionManifold contact = this.collisionManifoldArrayList.get(i);
-    this.ResolveCollision(contact);
+    
+    for(int i = 0; i < this.collisionManifoldArrayList.size(); i++)
+    {
+      CollisionManifold contact = this.collisionManifoldArrayList.get(i);
+      this.ResolveCollision(contact);
 
-    if(contact.getContactCount() > 0) {
-
+/* ---------------------------------Points of Contact Debugging --------------------------------- */
+/*
+      if(currentIteration == totalIterations - 1) {
       if(!this.pointsOfContact.contains(contact.pointsOfContact[0])){
 
-      this.pointsOfContact.add(contact.pointsOfContact[0]);
+        this.pointsOfContact.add(contact.pointsOfContact[0]);
 
       }
-    }
+      
+      if(contact.getContactCount() > 1) {
 
-    if(contact.getContactCount() > 1) {
+        if(!this.pointsOfContact.contains(contact.pointsOfContact[1])){
 
-      if(!this.pointsOfContact.contains(contact.pointsOfContact[1])){
-
-      this.pointsOfContact.add(contact.pointsOfContact[1]);
-
+          this.pointsOfContact.add(contact.pointsOfContact[1]);
       }
     }
   }
+*/
+/* ---------------------------------------------------------------------------------------------- */
 
-  //TIMEKEEPING
+}
+
+
+  /*-----------------Related to Timekeeping Debugging -----------------*/ 
   subSampleCount++;
   subWorldStepTime += System.nanoTime() - subWorldStepTimeStart;
+  /*-------------------------------------------------------------------*/
   }
-  //TIMEKEEPING
+  /*-----------------Related to Timekeeping Debugging -----------------*/
   totalSampleCount++;
   totalWorldStepTime += System.nanoTime() - totalWorldStepTimeStart;
+  /*-------------------------------------------------------------------*/
+  }
+
+
+
+  private void SeperateBodies(Rigidbody rigidbodyA, Rigidbody rigidbodyB, PVector minimumTranslationVector) { 
+    
+     if(rigidbodyA.getIsStatic()) {
+
+            rigidbodyB.Move(minimumTranslationVector);
+
+          } else if (rigidbodyB.getIsStatic()) {
+
+            rigidbodyA.Move(PVector.mult(minimumTranslationVector, -1.0f));
+
+          } else {
+
+            rigidbodyA.Move(PVector.mult(minimumTranslationVector, -0.5f));
+            rigidbodyB.Move(PVector.mult(minimumTranslationVector, 0.5f));  
+          }
   }
 
   public void ResolveCollision(CollisionManifold collisionManifold) {
@@ -196,6 +205,38 @@
     rigidbodyB.setVelocity(velocityB);
 
   }
+
+  /*
+  ==================================================================================================
+  ======================================== Helper Methods  =========================================
+  ==================================================================================================
+  */
+   public void AddBodyToBodyEntityList(Rigidbody body) {
+    rigidbodyList.add(body);
+  }
+
+  public void RemoveBodyFromBodyEntityList(Rigidbody body) {
+    rigidbodyList.remove(body);
+  }
+  
+  public void RemoveBodyFromBodyEntityList(int index) {
+    if(index < 0 || index >= rigidbodyList.size()){
+      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + rigidbodyList.size());
+    }
+    rigidbodyList.remove(index);
+  }
+
+  public Rigidbody GetBodyFromBodyEntityList(int index) {
+    if(index < 0 || index >= rigidbodyList.size()){
+      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + rigidbodyList.size());
+    }
+    return rigidbodyList.get(index);
+  }
+
+  public void ClearBodyEntityList() {
+    rigidbodyList.clear();
+  }
+
 
   
 
