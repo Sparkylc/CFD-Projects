@@ -7,7 +7,7 @@ public class CollisionManifold {
     private final PVector[] pointsOfContact;
     private final int contactCount;
 
-    public CollisionManifold(Rigidbody rigidbodyA, Rigidbody rigidbodyB, 
+    public CollisionManifold(Rigidbody rigidbodyA, Rigidbody rigidbodyB,
                              CollisionResult collisionResult) {
 
         this.rigidbodyA = rigidbodyA;

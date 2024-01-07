@@ -11,7 +11,7 @@ public class Rigidbody {
   private float Mass;
   private float InvMass;
   private float Density;
-  private float Restitution; 
+  private float Restitution;
   private float Area;
   private float RotationalInertia;
   private float InvRotationalInertia;
@@ -31,7 +31,7 @@ public class Rigidbody {
   private PVector fillColour;
   
   private boolean transformUpdateRequired;
-  private boolean aabbUpdateRequired; 
+  private boolean aabbUpdateRequired;
   
   private boolean isStatic;
   private boolean isVisible;
@@ -39,6 +39,8 @@ public class Rigidbody {
   private boolean isMouseInteractive;
   private boolean isSelected;
   
+  //TESTING THIS OUT
+  private float scaleFactor = 10.0f; //10px are 1 meter
   
 
   
@@ -61,7 +63,7 @@ public class Rigidbody {
     //do nothing
   }
   
-  private Rigidbody(float density, float mass, float rotationalIntertia, float restitution, 
+  private Rigidbody(float density, float mass, float rotationalIntertia, float restitution,
     float area, float radius, float width, float height, PVector[] vertices, boolean isStatic,
     boolean isCollidable, boolean isMouseInteractive, float strokeWeight,
     PVector strokeColour, PVector fillColour, ShapeType shapeType)
@@ -148,8 +150,8 @@ public class Rigidbody {
         PVector vertex = this.Vertices[i];
 
         this.transformedVertices[i] = PhysEngMath.Transform(vertex, this.position, this.angle);
-      } 
-    } 
+      }
+    }
     
     /*
     The way this transform system works, is that it caches the transformed vertices,
@@ -163,9 +165,9 @@ public class Rigidbody {
   }
   
   
-  public Rigidbody CreateCircleBody(float radius, float density, 
-    float restitution, boolean isStatic, boolean isCollidable, 
-    boolean isMouseInteractive, float strokeWeight, 
+  public Rigidbody CreateCircleBody(float radius, float density,
+    float restitution, boolean isStatic, boolean isCollidable,
+    boolean isMouseInteractive, float strokeWeight,
     PVector strokeColour, PVector fillColour) {
 
     Rigidbody rigidbody;
@@ -201,26 +203,25 @@ public class Rigidbody {
     float rotationalIntertia = 0f;
 
     if(!isStatic) {
-      //calculates mass from density and area
       mass = area * density;
       rotationalIntertia =  0.5f * mass * radius * radius;
     }
     
 
 
-    rigidbody = new Rigidbody(density, mass, rotationalIntertia, restitution, area, radius, 0, 0, 
-                              null, isStatic, isCollidable, isMouseInteractive, strokeWeight, 
+    rigidbody = new Rigidbody(density, mass, rotationalIntertia, restitution, area, radius, 0, 0,
+                              null, isStatic, isCollidable, isMouseInteractive, strokeWeight,
                               strokeColour, fillColour, ShapeType.CIRCLE);
     
     System.out.println("Rigidbody created with mass: " + mass + " and area: " + area);
     return rigidbody;
   }
   
-  public Rigidbody CreateBoxBody(float width, float height, float density, 
-    float restitution, boolean isStatic, boolean isCollidable, 
-    boolean isMouseInteractive, float strokeWeight, 
+  public Rigidbody CreateBoxBody(float width, float height, float density,
+    float restitution, boolean isStatic, boolean isCollidable,
+    boolean isMouseInteractive, float strokeWeight,
     PVector strokeColour, PVector fillColour) {
-    Rigidbody rigidbody; 
+    Rigidbody rigidbody;
     
     float area = width * height;
     
@@ -256,8 +257,8 @@ public class Rigidbody {
 
     PVector[] vertices = CreateBoxVertices(width, height);
     
-    rigidbody = new Rigidbody(density, mass, rotationalIntertia, restitution, area, 0, width, 
-                              height, vertices, isStatic, isCollidable, isMouseInteractive, 
+    rigidbody = new Rigidbody(density, mass, rotationalIntertia, restitution, area, 0, width,
+                              height, vertices, isStatic, isCollidable, isMouseInteractive,
                               strokeWeight, strokeColour, fillColour, ShapeType.BOX);
     
     System.out.println("Rigidbody created with mass: " + mass + " and area: " + area);
@@ -308,7 +309,7 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
   ==================================================================================================
   ==================================METHODS=========================================================
   ==================================================================================================
-  */  
+  */
   public void Move(PVector amount) {
     this.position.add(amount);
 
@@ -325,7 +326,6 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
 
   public void SetInitialPosition(PVector position) {
     this.position = position;
-
     this.transformUpdateRequired = true;
     this.aabbUpdateRequired = true;
   }
@@ -379,9 +379,11 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
       return;
     } else {
       this.aabbUpdateRequired = true;  
-            this.transformUpdateRequired = true;
+      this.transformUpdateRequired = true;
+      this.angle += this.angularVelocity * dt;
       dt /= (float)iterations;
       this.RK4Position(dt);
+      
 
 
         
@@ -420,8 +422,8 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
     PVector finalPosition = PVector.add(initialPosition, PVector.mult(PVector.add(k1_r, PVector.add(PVector.mult(k2_r, 2), PVector.add(PVector.mult(k3_r, 2), k4_r))), 1.0f / 6.0f));
     PVector finalVelocity = PVector.add(initialVelocity, PVector.mult(PVector.add(k1_v, PVector.add(PVector.mult(k2_v, 2), PVector.add(PVector.mult(k3_v, 2), k4_v))), 1.0f / 6.0f));
     
-    this.position = finalPosition;
-    this.linearVelocity = finalVelocity;
+    this.position = finalPosition.copy();
+    this.linearVelocity = finalVelocity.copy();
     this.transformUpdateRequired = true;
   }
   
@@ -501,9 +503,6 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
     return this.InvRotationalInertia;
   }
 
-  public float getAngle() {
-    return this.angle;
-  }
 
   
   /*
@@ -617,5 +616,21 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
   public void setIsVisible(boolean isVisible) {
     this.isVisible = isVisible;
   }
+    public float getAngle() {
+    return this.angle;
+  }
+
+  public void setAngle(float angle) {
+    this.angle = angle;
+  }
+
+  public float getAngularVelocity(){
+    return this.angularVelocity;
+  }
+
+  public void setAngularVelocity(float angularVelocity) {
+    this.angularVelocity = angularVelocity;
+  }
+
   
 }

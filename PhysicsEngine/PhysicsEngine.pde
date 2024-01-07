@@ -2,7 +2,6 @@
 float[] cameraExtents;
 
 
-int lastFrameTime;
 
 void setup() {
 
@@ -15,23 +14,23 @@ void setup() {
   interactivityListener = new InteractivityListener();
 
 
-  Rigidbody floor = RigidbodyGenerator.CreateBoxBody(width/2f,
-                                                   3f, 1f, 1f, true, true,
+  Rigidbody floor = RigidbodyGenerator.CreateBoxBody(100,
+                                                   2f, 1f, 1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
-  floor.SetInitialPosition(new PVector(0, -10));
+  floor.SetInitialPosition(new PVector(0, 0));
 
-  Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(50f,
-                                                   3f, 1f, 1f, true, true,
+  Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(30f,
+                                                   1f, 1f, 1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
-  slantedFloor1.SetInitialPosition(new PVector(-20, -50));
+  slantedFloor1.SetInitialPosition(new PVector(-10, -10));
 
-   Rigidbody slantedFloor2 = RigidbodyGenerator.CreateBoxBody(50f,
-                                                   3f, 1f, 1f, true, true,
+   Rigidbody slantedFloor2 = RigidbodyGenerator.CreateBoxBody(30f,
+                                                   2f, 1f, 1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
-  slantedFloor2.SetInitialPosition(new PVector(20, -70));
+  slantedFloor2.SetInitialPosition(new PVector(20, -20));
   
   slantedFloor1.Rotate(PI/6);
   slantedFloor2.Rotate(-PI/6);
@@ -45,19 +44,20 @@ void setup() {
 
 
 void draw() {
+    int currentFrameTime = millis();
 
-  int currentFrameTime = millis();
-  background(16, 18, 19);
   interactivityListener.applyTransform();
-  
+
   render.draw();
-  float dt = (currentFrameTime - lastFrameTime) / 1000f;
+
+  
+  dt = (currentFrameTime - lastFrameTime) / 1000f;
   Step(dt, 20);
 
   interactivityListener.resetTransform();
   displayTimings();
-/*------------------------------------Timing Utilities--------------------------------------------*/
- lastFrameTime = currentFrameTime;
+
+  lastFrameTime = currentFrameTime;
 }
 
 

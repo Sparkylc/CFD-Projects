@@ -1,8 +1,8 @@
 
 
 public class InteractivityListener {
-  PVector position;
-  float zoom;
+  public PVector position;
+  public float zoom;
 
   public InteractivityListener() {
     position = new PVector(0, -50);
@@ -52,7 +52,7 @@ public class InteractivityListener {
   float bottom = screenToWorld(width - padding, height - padding).y;
 
   return new float[] {left, right, top, bottom};
-} 
+}
 //Overloaded method that returns the camera extents as PVector coordinates
 public PVector[] getWorldBoundsWithPadding(float padding) {
   PVector topLeft = screenToWorld(padding, padding);
@@ -79,15 +79,15 @@ public void mouseClicked() {
   }
     if(mouseButton == LEFT) {
 
-    float width = random(2, 8);
-    float height = random(2, 8);
+    float width = random(0.1, 3); //0.1m to 3m
+    float height = random(0.1, 3);
     float rotation = random(0, 3);
 
-    Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody(width, height, 
-                                                           0.5f, 0.5f, 
+    Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody(width, height,
+                                                           0.5f, 0.5f,
                                                            false, true,
-                                                           true, 0.25, 
-                                                           new PVector(0, 0, 0), 
+                                                           true, 0.25,
+                                                           new PVector(0, 0, 0),
                                                            new PVector(255, 255, 255));
 
 
@@ -100,10 +100,10 @@ public void mouseClicked() {
   }
   if(mouseButton == RIGHT) {
 
-    float radius = random(1, 3);
+    float radius = random(0.1, 2); //0.1m to 2m
 
-    Rigidbody rigidbody = RigidbodyGenerator.CreateCircleBody(radius, 0.5f, 0.5f, 
-                                                              false, true, true, 
+    Rigidbody rigidbody = RigidbodyGenerator.CreateCircleBody(radius, 0.5f, 0.5f,
+                                                              false, true, true,
                                                               0.25, new PVector(0, 0, 0),
                                                               new PVector(255, 255, 255));
     rigidbody.SetInitialPosition(interactivityListener.screenToWorld(mouseX, mouseY));
@@ -111,7 +111,7 @@ public void mouseClicked() {
 
     
     rigidbody.addForceToForceRegistry(new Gravity());
-    AddBodyToBodyEntityList(rigidbody);                     
+    AddBodyToBodyEntityList(rigidbody);
 
   }
 }

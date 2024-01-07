@@ -15,6 +15,12 @@ public int bodyCount;
 String totalStepTimeUnit;
 String subStepTimeUnit;
 
+
+int lastFrameTime;
+float dt;
+float fps;
+float displayTimeStep;
+
 /*----------------------------------------------------------------------------------------------*/
 
 
@@ -31,13 +37,15 @@ public Shape render = new Shape();
 
 
 public ArrayList<Rigidbody> rigidbodyList = new ArrayList<Rigidbody>();
-public ArrayList<CollisionManifold> collisionManifoldArrayList = new ArrayList<CollisionManifold>();
+public ArrayList<ArrayList<Integer>> collisionPairs = new ArrayList<ArrayList<Integer>>();
+    
 
+public PVector[] contactList = new PVector[2];
+public PVector[] impulseList = new PVector[2];
+public PVector[] raList = new PVector[2];
+public PVector[] rbList = new PVector[2];
+   
 
-/*---------------------------------Points of Contact Debugging --------------------------------- 
-public boolean showCollisionPoints = true;
-public ArrayList<PVector> pointsOfContact = new ArrayList<PVector>();
----------------------------------------------------------------------------------------------- */
 
 public final float MIN_BODY_AREA = 0.01f * 0.01f; // m^2
 public final float MAX_BODY_AREA = 300f * 300f; // m^2
@@ -47,6 +55,8 @@ public final float MAX_BODY_DENSITY = 30.0f; //g/cm^3
 
 public final int MIN_ITERATIONS = 1;
 public final int MAX_ITERATIONS = 128;
+
+public PVector BACKGROUND_COLOUR = new PVector(16, 18, 19);
 
 
 public final PVector GRAVITY_VECTOR = new PVector(0, 9.81f, 0);
@@ -62,9 +72,6 @@ public void Step(float dt, int totalIterations) {
     long totalWorldStepTimeStart = System.nanoTime();
     /*-------------------------------------------------------------------*/
     
-    /* ------------------------Points of Contact Debugging Variable-------------------------------------
-    this.pointsOfContact.clear();
-    /* ----------------------------------------------------- */
     
     totalIterations = PhysEngMath.Clamp(totalIterations, MIN_ITERATIONS, MAX_ITERATIONS);
     
@@ -75,7 +82,8 @@ public void Step(float dt, int totalIterations) {
         /*-------------------------------------------------------------------*/
         
         
-        collisionManifoldArrayList.clear();
+        this.collisionPairs.clear();
+
         StepBodies(dt, totalIterations);
         BroadPhaseStep();
         NarrowPhaseStep();
@@ -120,7 +128,7 @@ public void SeperateBodies(Rigidbody rigidbodyA, Rigidbody rigidbodyB, PVector m
 }
 
 
-public void ResolveCollision(CollisionManifold collisionManifold) {
+public void ResolveCollisionLinear(CollisionManifold collisionManifold) {
     
     Rigidbody rigidbodyA = collisionManifold.getRigidbodyA();
     Rigidbody rigidbodyB = collisionManifold.getRigidbodyB();
@@ -145,12 +153,84 @@ public void ResolveCollision(CollisionManifold collisionManifold) {
     PVector impulse = PVector.mult(normal, j);
     
     
-    velocityA = PVector.sub(velocityA, PVector.mult(impulse, invMassA));
+    velocityA = PVector.add(velocityA, PVector.mult(PVector.mult(impulse, -1), invMassA));
     velocityB = PVector.add(velocityB, PVector.mult(impulse, invMassB));
     
     rigidbodyA.setVelocity(velocityA);
     rigidbodyB.setVelocity(velocityB);
     
+}
+
+public void ResolveCollisionRotation(CollisionManifold contact) {
+    Rigidbody rigidbodyA = contact.getRigidbodyA();
+    Rigidbody rigidbodyB = contact.getRigidbodyB();
+    PVector normal = contact.getNormal();
+    PVector contact1 = contact.getPointsOfContact()[0];
+    PVector contact2 = contact.getPointsOfContact()[1];
+    int contactCount = contact.getContactCount();
+
+    float e = min(rigidbodyA.getRestitution(), rigidbodyB.getRestitution());
+
+    this.contactList[0] = contact1;
+    this.contactList[1] = contact2;
+
+    for(int i = 0; i < contactCount; i++) {
+        this.impulseList[i] = new PVector();
+        this.raList[i] = new PVector();
+        this.rbList[i] = new PVector();
+    }
+
+    for (int i = 0; i < contactCount; i++) {
+        PVector ra = contactList[i].copy().sub(rigidbodyA.getPosition());
+        PVector rb = contactList[i].copy().sub(rigidbodyB.getPosition());
+
+        raList[i] = ra;
+        rbList[i] = rb;
+
+        PVector raPerp = new PVector(-ra.y, ra.x);
+        PVector rbPerp = new PVector(-rb.y, rb.x);
+
+        PVector angularLinearVelocityA = raPerp.copy().mult(rigidbodyA.getAngularVelocity());
+        PVector angularLinearVelocityB = rbPerp.copy().mult(rigidbodyB.getAngularVelocity());
+
+        PVector relativeVelocity =
+            (rigidbodyB.getVelocity().copy().add(angularLinearVelocityB)).sub(
+            rigidbodyA.getVelocity().copy().add(angularLinearVelocityA));
+
+        float contactVelocityMag = relativeVelocity.dot(normal);
+
+        if (contactVelocityMag > 0f) {
+            continue;
+        }
+
+        float raPerpDotN = raPerp.dot(normal);
+        float rbPerpDotN = rbPerp.dot(normal);
+
+        float denom = rigidbodyA.getInvMass() + rigidbodyB.getInvMass() +
+            (raPerpDotN * raPerpDotN) * rigidbodyA.getInvRotationalInertia() +
+            (rbPerpDotN * rbPerpDotN) * rigidbodyB.getInvRotationalInertia();
+
+        float j = -(1f + e) * contactVelocityMag;
+        j /= denom;
+        j /= (float)contactCount;
+
+        PVector impulse = normal.copy().mult(j);
+        impulseList[i] = impulse;
+    }
+
+    for(int i = 0; i < contactCount; i++) {
+        PVector impulse = impulseList[i];
+        PVector ra = raList[i];
+        PVector rb = rbList[i];
+
+        float raCrossImpulse = ra.x * impulse.y - ra.y * impulse.x;
+        float rbCrossImpulse = rb.x * impulse.y - rb.y * impulse.x;
+
+        rigidbodyA.setVelocity(rigidbodyA.getVelocity().copy().add(impulse.copy().mult(-rigidbodyA.getInvMass())));
+        rigidbodyA.setAngularVelocity(rigidbodyA.getAngularVelocity() + raCrossImpulse * -rigidbodyA.getInvRotationalInertia());
+        rigidbodyB.setVelocity(rigidbodyB.getVelocity().copy().add(impulse.copy().mult(rigidbodyB.getInvMass())));
+        rigidbodyB.setAngularVelocity(rigidbodyB.getAngularVelocity() + rbCrossImpulse * rigidbodyB.getInvRotationalInertia());
+    }
 }
 /*
 ==================================================================================================
@@ -181,56 +261,34 @@ public void BroadPhaseStep() {
             if (!Collisions.IntersectAABB(rigidbodyA_AABB, rigidbodyB_AABB)) {
                 continue;
             }
-            
-            
-            //The result of the collision which holds the collision values
-            CollisionResult collisionResult = Collisions.Collide(rigidbodyA, rigidbodyB);
-            
-            if (collisionResult.getIsColliding()) {
-                
-                PVector minimumTranslationVector = PVector.mult(collisionResult.getNormal(), collisionResult.getDepth());
-                
-                SeperateBodies(rigidbodyA, rigidbodyB, minimumTranslationVector);
-                
-                Collisions.FindCollisionPoints(rigidbodyA, rigidbodyB, collisionResult);
-                
-                CollisionManifold collisionManifold = new CollisionManifold(rigidbodyA, rigidbodyB, collisionResult);
-                collisionManifoldArrayList.add(collisionManifold);
-                
-            }
+
+            ArrayList<Integer> pair = new ArrayList<Integer>(Arrays.asList(i, j));
+            collisionPairs.add(pair);
         }
     }
 }
 
 public void NarrowPhaseStep() {
-    for (int i = 0; i < this.collisionManifoldArrayList.size(); i++)
+    for (int i = 0; i < collisionPairs.size(); i++)
     {
-        CollisionManifold contact = this.collisionManifoldArrayList.get(i);
-        this.ResolveCollision(contact);
+        ArrayList<Integer> pair = collisionPairs.get(i);
+        Rigidbody rigidbodyA = rigidbodyList.get(pair.get(0));
+        Rigidbody rigidbodyB = rigidbodyList.get(pair.get(1));
         
-        /* ---------------------------------Points of Contact Debugging --------------------------------- */ 
-        /*
-        if (currentIteration == totalIterations - 1) {
-            if (!this.pointsOfContact.contains(contact.pointsOfContact[0])) {
-                
-                this.pointsOfContact.add(contact.pointsOfContact[0]);
-                
-        }
+        CollisionResult collisionResult = Collisions.Collide(rigidbodyA, rigidbodyB);
             
-            if (contact.getContactCount() > 1) {
+        if (collisionResult.getIsColliding()) {
                 
-                if (!this.pointsOfContact.contains(contact.pointsOfContact[1])) {
-                    
-                    this.pointsOfContact.add(contact.pointsOfContact[1]);
-            }
-            }
+            PVector minimumTranslationVector = PVector.mult(collisionResult.getNormal(), collisionResult.getDepth());
+            
+            SeperateBodies(rigidbodyA, rigidbodyB, minimumTranslationVector);
+            Collisions.FindCollisionPoints(rigidbodyA, rigidbodyB, collisionResult);
+            CollisionManifold collisionManifold = new CollisionManifold(rigidbodyA, rigidbodyB, collisionResult);
+            this.ResolveCollisionRotation(collisionManifold);
+                
         }
-        */
-        /* ---------------------------------------------------------------------------------------------- */ 
-        
     }
-        
-    }
+}
         
 public void StepBodies(float dt, int totalIterations) {
 
@@ -275,7 +333,8 @@ public void ClearBodyEntityList() {
 }
 
 public void displayTimings() {
-    if(millis() - systemTime>= 200) {
+
+if(millis() - systemTime>= 200) {
   totalStepTime = ((totalWorldStepTime) / totalSampleCount);
   subStepTime = ((subWorldStepTime) / subSampleCount);
   bodyCount = rigidbodyList.size();
@@ -310,11 +369,18 @@ public void displayTimings() {
   totalSampleCount = 0;
   subSampleCount = 0;
   systemTime = millis();
+
+  fps = frameRate;
+  displayTimeStep = dt;
+
+
 }
 
 text("Total Step Time: " + totalStepTime + totalStepTimeUnit, 10, 20);
 text("Sub Step Time: " + subStepTime + subStepTimeUnit, 10, 40);
 text("Body Count: " + bodyCount, 10, 60);
+text("FPS: " + fps, 10, 80);
+text("dt: " + displayTimeStep, 10, 100);
 /*------------------------------------------------------------------------------------------------*/
 }
              
