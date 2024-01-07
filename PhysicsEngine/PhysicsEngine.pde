@@ -12,7 +12,7 @@ void setup() {
   rigidbodyList = new ArrayList<Rigidbody>();
   interactivityListener = new InteractivityListener();
 
-  Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody()
+
   Rigidbody floor = RigidbodyGenerator.CreateBoxBody(width/2f,
                                                    3f, 1f, 1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
