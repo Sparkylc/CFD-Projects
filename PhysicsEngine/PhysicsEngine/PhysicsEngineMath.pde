@@ -1,6 +1,23 @@
 
 public static class PhysEngMath {
+
+  //Precision for float comparison, equal to 0.00005 meters
+  public static final float precision = 0.00005f;
+
   public static float Clamp(float value, float min, float max) {
+    if (min == max) {
+      return min;
+    } else if (min > max) {
+      throw new IllegalArgumentException("min must be less than max");
+    } else if (value < min) {
+      return min;
+    } else if (value > max) {
+      return max;
+    } else {
+      return value;
+    }
+  }
+  public static int Clamp(int value, int min, int max) {
     if (min == max) {
       return min;
     } else if (min > max) {
@@ -57,4 +74,14 @@ public static class PhysEngMath {
   }
   
   public static PVector zeroTransform = Transform(0, 0, 0);
+
+  public static boolean Equals(float a, float b) {
+
+    return Math.abs(a - b) < precision;
+
+  }
+
+  public static boolean Equals(PVector a, PVector b) {
+    return Equals(a.x, b.x) && Equals(a.y, b.y);
+  }
 }

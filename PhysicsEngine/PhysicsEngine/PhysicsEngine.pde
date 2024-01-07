@@ -1,44 +1,84 @@
 
+float[] cameraExtents;
+
+
+
 void setup() {
+
   size(1000, 1000);
   frameRate(240);
-    rigidbodyArrayList = new ArrayList<Rigidbody>();
-  interactivityListener = new InteractivityListener();
-  
-  int bodyCount = 10;
-  int type = 0;
-  
-  for (int i = 0; i < bodyCount; i++) {
-    
-    float padding = 20.0f;
-    type = (int)random(0, 2);
-      
-      
-    Rigidbody rigidbody = null;
-    
-    
-    float x = random(padding, width - padding);
-    float y = random(padding, height - padding);
 
-    
-    
-    if (type == 0) {
-      rigidbody = rigidbodyGenerator.CreateCircleBody(20f, new PVector(x, y), 0.5f, 0.5f, true, true, true, 5f, new PVector(0,0,0), new PVector(255, 255, 255));
-    } else{
-      rigidbody = rigidbodyGenerator.CreateBoxBody(30f, 20f, new PVector(x, y), 0.5f, 0.5f, true, true, true, 5f, new PVector(0,0,0), new PVector(255, 255, 255));
-    }
-    rigidbodyArrayList.add(rigidbody);
-  }
+  rigidbodyArrayList = new ArrayList<Rigidbody>();
+  interactivityListener = new InteractivityListener();
+
+
+  Rigidbody floor = RigidbodyGenerator.CreateBoxBody(width/2,
+                                                   3, new PVector(0, -10), 1f, 1f, true, true,
+                                                   true, 0.25, new PVector(0, 0, 0),
+                                                   new PVector(255, 255, 255));
+  Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(50,
+                                                   3, new PVector(-20, -50), 1f, 1f, true, true,
+                                                   true, 0.25, new PVector(0, 0, 0),
+                                                   new PVector(255, 255, 255));
+   Rigidbody slantedFloor2 = RigidbodyGenerator.CreateBoxBody(50,
+                                                   3, new PVector(20, -70), 1f, 1f, true, true,
+                                                   true, 0.25, new PVector(0, 0, 0),
+                                                   new PVector(255, 255, 255));
+  
+  slantedFloor1.Rotate(PI/6);
+  slantedFloor2.Rotate(-PI/6);
+
+  rigidbodyArrayList.add(slantedFloor1);
+  rigidbodyArrayList.add(slantedFloor2);
+  rigidbodyArrayList.add(floor);
+  //TIMING UTILITIES
 }
 
-float rotationCount = 0;
+
+//TIMING UTILITIES
+
+double totalStepTime;
+double subStepTime;
+int bodyCount;
+
 void draw() {
+
+
   background(16, 18, 19);
+  //Applies the camera transform
   interactivityListener.applyTransform();
+
   for (Rigidbody rigidbody : rigidbodyArrayList) {
-    //rigidbody.Rotate(radians(rotationCount*0.01));
     rigidbody.draw();
+    rigidbody.drawAABB();
   }
-  Step(0.01);
+  for(PVector point : pointsOfContact) {
+    stroke(0, 0, 0);
+    strokeWeight(0.1f);
+    noFill();
+    rectMode(CENTER);
+    rect(point.x, point.y, 1, 1);
+  }
+
+  Step(0.01, 64);
+
   interactivityListener.resetTransform();
+
+    //TIMING UTILITIES
+  if(millis() - systemTime>= 200) {
+    totalStepTime = ((totalWorldStepTime/1000) / totalSampleCount);
+    subStepTime = ((subWorldStepTime/1000) / subSampleCount);
+    bodyCount = rigidbodyArrayList.size();
+
+    //updates the counter and resets values
+    totalWorldStepTime = 0;
+    subWorldStepTime = 0;
+    totalSampleCount = 0;
+    subSampleCount = 0;
+    systemTime = millis();
+    }
+  
+  text("Total Step Time: " + totalStepTime + "\u03BCs", 10, 20);
+  text("Sub Step Time: " + subStepTime + "\u03BCs", 10, 40);
+  text("Body Count: " + bodyCount, 10, 60);
 }

@@ -1,4 +1,4 @@
-Rigidbody movingRigidbody;
+
 
 public class InteractivityListener {
   PVector position;
@@ -6,7 +6,7 @@ public class InteractivityListener {
 
   public InteractivityListener() {
     position = new PVector(0, 0);
-    zoom = 1;
+    zoom = 24f;
   }
 
   public void zoom(float amount, float mouseX, float mouseY) {
@@ -43,6 +43,25 @@ public class InteractivityListener {
     position.x += dx / zoom;
     position.y += dy / zoom;
   }
+
+  public float[] getCameraExtents(float padding) {
+
+  float left = screenToWorld(padding, padding).x;
+  float right = screenToWorld(width - padding, padding).x;
+  float top = screenToWorld(padding, padding).y;
+  float bottom = screenToWorld(width - padding, height - padding).y;
+
+  return new float[] {left, right, top, bottom};
+} 
+//Overloaded method that returns the camera extents as PVector coordinates
+public PVector[] getWorldBoundsWithPadding(float padding) {
+  PVector topLeft = screenToWorld(padding, padding);
+  PVector topRight = screenToWorld(width - padding, padding);
+  PVector bottomLeft = screenToWorld(padding, height - padding);
+  PVector bottomRight = screenToWorld(width - padding, height - padding);
+
+  return new PVector[] {topLeft, topRight, bottomLeft, bottomRight};
+}
 }
 
 public void mouseWheel(MouseEvent event) {
@@ -58,6 +77,31 @@ public void mouseClicked() {
   for(Rigidbody rigidbody : rigidbodyArrayList) {
     rigidbody.mouseInteraction();
   }
+    if(mouseButton == LEFT) {
+    float width = random(0, 10);
+    float height = random(0, 10);
+    float rotation = random(0, 3);
+    Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody(width, height, 
+                                                interactivityListener.screenToWorld(mouseX, mouseY), 
+                                               0.5f, 0.5f, false, true,
+                                                   true, 0.25, new PVector(0, 0, 0),
+                                                   new PVector(255, 255, 255));
+    //rigidbody.Rotate(rotation);
+    rigidbody.addForceToForceRegistry(new Gravity());
+    rigidbodyArrayList.add(rigidbody);
+  
+  }
+  if(mouseButton == RIGHT) {
+    float radius = random(0, 3);
+    Rigidbody rigidbody = RigidbodyGenerator.CreateCircleBody(radius, 
+                                                interactivityListener.screenToWorld(mouseX, mouseY), 
+                                               0.5f, 0.5f, false, true,
+                                                   true, 0.25, new PVector(0, 0, 0),
+                                                   new PVector(255, 255, 255));
+      rigidbody.addForceToForceRegistry(new Gravity());
+    rigidbodyArrayList.add(rigidbody);                          
+
+  }
 }
 
 public void mouseMoved(){
@@ -66,35 +110,5 @@ public void mouseMoved(){
   }
 }
 
-int currentObject = 0;
 
-public void keyPressed(){
-  if(keyCode >= 0 && keyCode <= 9){
-    currentObject = keyCode;
-  } 
-  if(key == 'w'){
-      rigidbodyArrayList.get(currentObject).Move(new PVector(0, -10f));
-      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
-  }
-  if(key == 's'){
-      rigidbodyArrayList.get(currentObject).Move(new PVector(0, 10f));
-      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
-  }
-  if(key == 'a'){
-      rigidbodyArrayList.get(currentObject).Move(new PVector(-10f, 0));
-      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
-  }
-  if(key == 'd'){
-      rigidbodyArrayList.get(currentObject).Move(new PVector(10f, 0));
-      rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
-  }
-  if(keyCode == LEFT) {
-    rigidbodyArrayList.get(currentObject).Rotate(-0.1f);
-    rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
-  }
-  if(keyCode == RIGHT) {
-    rigidbodyArrayList.get(currentObject).Rotate(0.1f);
-    rigidbodyArrayList.get(currentObject).setTransformUpdateRequired(true);
-  }
-}
 

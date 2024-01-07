@@ -1,5 +1,6 @@
 {
     "docwriter.style": "Javadoc",
+    "inline-parameters.enabled": true,
     "externalFormatters.languages": {
       "java": {
           "command": "java",
