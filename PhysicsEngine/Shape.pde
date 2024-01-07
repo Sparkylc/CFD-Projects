@@ -25,7 +25,7 @@ public class Shape {
           
           if (rigidbody.getShapeType() == ShapeType.CIRCLE) {
             drawCircle(rigidbody.getPosition(), rigidbody.getRadius(),
-                       rigidbody.getStrokeWeight(), rigidbody.getFillColour(),
+                      rigidbody.getAngle(), rigidbody.getStrokeWeight(), rigidbody.getFillColour(),
                        rigidbody.getStrokeColour());
           }
 
@@ -37,7 +37,7 @@ public class Shape {
         }
       }
   }
-  public void drawCircle(PVector position, float radius, float strokeWeight, PVector fillColour,
+  public void drawCircle(PVector position, float radius, float angle, float strokeWeight, PVector fillColour,
     PVector strokeColour) {
     
     float diameter = radius * 2.0f;
@@ -46,6 +46,12 @@ public class Shape {
     strokeWeight(strokeWeight);
     ellipseMode(CENTER);
     ellipse(position.x, position.y,  diameter,  diameter);
+
+    PVector va = new PVector();
+    PVector vb = new  PVector(radius, 0);
+    va = PhysEngMath.Transform(va, position, angle);
+    vb = PhysEngMath.Transform(vb, position, angle);
+    line(va.x, va.y, vb.x, vb.y);
   }
   
   public void drawBox(PVector position, float width, float height, float angle, float strokeWeight,

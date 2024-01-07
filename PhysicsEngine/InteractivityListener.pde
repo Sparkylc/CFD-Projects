@@ -86,7 +86,7 @@ public void mouseClicked() {
     Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody(width, height,
                                                            0.1f, 0.1f,
                                                            false, true,
-                                                           true, 0.25,
+                                                           true, 0.05,
                                                            new PVector(0, 0, 0),
                                                            new PVector(255, 255, 255));
 
@@ -104,10 +104,10 @@ public void mouseClicked() {
 
     Rigidbody rigidbody = RigidbodyGenerator.CreateCircleBody(radius, 0.5f, 0.5f,
                                                               false, true, true,
-                                                              0.25, new PVector(0, 0, 0),
+                                                              0.05, new PVector(0, 0, 0),
                                                               new PVector(255, 255, 255));
     rigidbody.SetInitialPosition(interactivityListener.screenToWorld(mouseX, mouseY));
-
+    rigidbody.setAngularVelocity(random(-0.5f, 0.5f));
 
     
     rigidbody.addForceToForceRegistry(new Gravity());
