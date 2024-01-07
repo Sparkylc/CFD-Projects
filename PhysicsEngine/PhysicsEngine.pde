@@ -15,19 +15,19 @@ void setup() {
 
 
   Rigidbody floor = RigidbodyGenerator.CreateBoxBody(100,
-                                                   2f, 1f, 1f, true, true,
+                                                   2f, 0.1f, 0.1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
   floor.SetInitialPosition(new PVector(0, 0));
 
   Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(30f,
-                                                   1f, 1f, 1f, true, true,
+                                                   1f, 0.1f, 0.1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
   slantedFloor1.SetInitialPosition(new PVector(-10, -10));
 
    Rigidbody slantedFloor2 = RigidbodyGenerator.CreateBoxBody(30f,
-                                                   2f, 1f, 1f, true, true,
+                                                   2f, 0.1f, 0.1f, true, true,
                                                    true, 0.25, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
   slantedFloor2.SetInitialPosition(new PVector(20, -20));

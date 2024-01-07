@@ -84,7 +84,7 @@ public void mouseClicked() {
     float rotation = random(0, 3);
 
     Rigidbody rigidbody = RigidbodyGenerator.CreateBoxBody(width, height,
-                                                           0.5f, 0.5f,
+                                                           0.1f, 0.1f,
                                                            false, true,
                                                            true, 0.25,
                                                            new PVector(0, 0, 0),

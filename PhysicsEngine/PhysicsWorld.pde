@@ -40,7 +40,7 @@ public ArrayList<Rigidbody> rigidbodyList = new ArrayList<Rigidbody>();
 public ArrayList<ArrayList<Integer>> collisionPairs = new ArrayList<ArrayList<Integer>>();
     
 
-public PVector[] contactList = new PVector[2];
+public PVector[] contactList = new PVector[0];
 public PVector[] impulseList = new PVector[2];
 public PVector[] raList = new PVector[2];
 public PVector[] rbList = new PVector[2];
@@ -164,15 +164,21 @@ public void ResolveCollisionLinear(CollisionManifold collisionManifold) {
 public void ResolveCollisionRotation(CollisionManifold contact) {
     Rigidbody rigidbodyA = contact.getRigidbodyA();
     Rigidbody rigidbodyB = contact.getRigidbodyB();
+    float invMassA = rigidbodyA.getInvMass();
+    float invMassB = rigidbodyB.getInvMass();
+    float invRotationalInertiaA = rigidbodyA.getInvRotationalInertia();
+    float invRotationalInertiaB = rigidbodyB.getInvRotationalInertia();
     PVector normal = contact.getNormal();
-    PVector contact1 = contact.getPointsOfContact()[0];
-    PVector contact2 = contact.getPointsOfContact()[1];
+    PVector velocityA = rigidbodyA.getVelocity();
+    PVector velocityB = rigidbodyB.getVelocity();
+    float angularVelocityA = rigidbodyA.getAngularVelocity();
+    float angularVelocityB = rigidbodyB.getAngularVelocity();
+
     int contactCount = contact.getContactCount();
+    contactList = contact.getPointsOfContact();
 
     float e = min(rigidbodyA.getRestitution(), rigidbodyB.getRestitution());
 
-    this.contactList[0] = contact1;
-    this.contactList[1] = contact2;
 
     for(int i = 0; i < contactCount; i++) {
         this.impulseList[i] = new PVector();
@@ -181,8 +187,8 @@ public void ResolveCollisionRotation(CollisionManifold contact) {
     }
 
     for (int i = 0; i < contactCount; i++) {
-        PVector ra = contactList[i].copy().sub(rigidbodyA.getPosition());
-        PVector rb = contactList[i].copy().sub(rigidbodyB.getPosition());
+        PVector ra = PVector.sub(contactList[i], rigidbodyA.getPosition());
+        PVector rb = PVector.sub(contactList[i], rigidbodyB.getPosition());
 
         raList[i] = ra;
         rbList[i] = rb;
@@ -190,12 +196,11 @@ public void ResolveCollisionRotation(CollisionManifold contact) {
         PVector raPerp = new PVector(-ra.y, ra.x);
         PVector rbPerp = new PVector(-rb.y, rb.x);
 
-        PVector angularLinearVelocityA = raPerp.copy().mult(rigidbodyA.getAngularVelocity());
-        PVector angularLinearVelocityB = rbPerp.copy().mult(rigidbodyB.getAngularVelocity());
+        PVector angularLinearVelocityA = PVector.mult(raPerp, angularVelocityA);
+        PVector angularLinearVelocityB = PVector.mult(rbPerp, angularVelocityB);
 
-        PVector relativeVelocity =
-            (rigidbodyB.getVelocity().copy().add(angularLinearVelocityB)).sub(
-            rigidbodyA.getVelocity().copy().add(angularLinearVelocityA));
+        PVector relativeVelocity = PVector.sub(PVector.add(velocityB, angularLinearVelocityB),
+                                               PVector.add(velocityA, angularLinearVelocityA));
 
         float contactVelocityMag = relativeVelocity.dot(normal);
 
@@ -206,15 +211,15 @@ public void ResolveCollisionRotation(CollisionManifold contact) {
         float raPerpDotN = raPerp.dot(normal);
         float rbPerpDotN = rbPerp.dot(normal);
 
-        float denom = rigidbodyA.getInvMass() + rigidbodyB.getInvMass() +
-            (raPerpDotN * raPerpDotN) * rigidbodyA.getInvRotationalInertia() +
-            (rbPerpDotN * rbPerpDotN) * rigidbodyB.getInvRotationalInertia();
+        float denom = (invMassA + invMassB) +
+            ((raPerpDotN * raPerpDotN) * invRotationalInertiaA) +
+            ((rbPerpDotN * rbPerpDotN) * invRotationalInertiaB);
 
         float j = -(1f + e) * contactVelocityMag;
         j /= denom;
         j /= (float)contactCount;
 
-        PVector impulse = normal.copy().mult(j);
+        PVector impulse = PVector.mult(normal, j);
         impulseList[i] = impulse;
     }
 
@@ -223,13 +228,19 @@ public void ResolveCollisionRotation(CollisionManifold contact) {
         PVector ra = raList[i];
         PVector rb = rbList[i];
 
-        float raCrossImpulse = ra.x * impulse.y - ra.y * impulse.x;
-        float rbCrossImpulse = rb.x * impulse.y - rb.y * impulse.x;
+        //float raCrossImpulse = ra.x * impulse.y - ra.y * impulse.x;
+        //float rbCrossImpulse = rb.x * impulse.y - rb.y * impulse.x;
 
-        rigidbodyA.setVelocity(rigidbodyA.getVelocity().copy().add(impulse.copy().mult(-rigidbodyA.getInvMass())));
-        rigidbodyA.setAngularVelocity(rigidbodyA.getAngularVelocity() + raCrossImpulse * -rigidbodyA.getInvRotationalInertia());
-        rigidbodyB.setVelocity(rigidbodyB.getVelocity().copy().add(impulse.copy().mult(rigidbodyB.getInvMass())));
-        rigidbodyB.setAngularVelocity(rigidbodyB.getAngularVelocity() + rbCrossImpulse * rigidbodyB.getInvRotationalInertia());
+        velocityA.add(PVector.mult(impulse, -invMassA));
+        velocityB.add(PVector.mult(impulse, invMassB));
+
+        angularVelocityA += ra.cross(impulse).z * -1 * invRotationalInertiaA;
+        angularVelocityB += rb.cross(impulse).z * invRotationalInertiaB;
+
+        rigidbodyA.setVelocity(velocityA);
+        rigidbodyB.setVelocity(velocityB);
+        rigidbodyA.setAngularVelocity(angularVelocityA);
+        rigidbodyB.setAngularVelocity(angularVelocityB);
     }
 }
 /*
