@@ -1,7 +1,7 @@
 
-Rigidbody rigidbody = new Rigidbody(new PVector(500, 500), new PVector(0, 0), new Integrator());
-Rigidbody springRigidbody = new Rigidbody(new PVector(500,600), new PVector(0, 0), new Integrator());
-Rigidbody testBody = new Rigidbody(new PVector(500,600), new PVector(0, 0), new Integrator());
+Rigidbody rigidbody = new Rigidbody(new PVector(500, 500), new PVector(0, 0));
+Rigidbody springRigidbody = new Rigidbody(new PVector(500,600), new PVector(0, 0));
+Rigidbody testBody = new Rigidbody(new PVector(500,600), new PVector(0, 0));
 
 AddForce addForce = new AddForce();
 

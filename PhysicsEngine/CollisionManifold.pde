@@ -1,46 +1,47 @@
 public class CollisionManifold {
-    private final Rigidbody rigidbodyA;
-    private final Rigidbody rigidbodyB;
-    private final PVector normal;
-    private final float depth;
 
-    private final PVector[] pointsOfContact;
-    private final int contactCount;
+    private final Rigidbody RigidbodyA;
+    private final Rigidbody RigidbodyB;
+    private final PVector Normal;
+    private final float Depth;
+
+    private final PVector[] PointsOfContact;
+    private final int ContactCount;
 
     public CollisionManifold(Rigidbody rigidbodyA, Rigidbody rigidbodyB,
                              CollisionResult collisionResult) {
 
-        this.rigidbodyA = rigidbodyA;
-        this.rigidbodyB = rigidbodyB;
-        this.normal = collisionResult.getNormal();
-        this.depth = collisionResult.getDepth();
-        this.pointsOfContact = collisionResult.getPointsOfContact();
-        this.contactCount = pointsOfContact.length;
+        this.RigidbodyA = rigidbodyA;
+        this.RigidbodyB = rigidbodyB;
+        this.Normal = collisionResult.getNormal();
+        this.Depth = collisionResult.getDepth();
+        this.PointsOfContact = collisionResult.getPointsOfContact();
+        this.ContactCount = collisionResult.getContactCount();
     }
     
 
     public Rigidbody getRigidbodyA() {
-        return rigidbodyA;
+        return RigidbodyA;
     }
 
     public Rigidbody getRigidbodyB() {
-        return rigidbodyB;
+        return RigidbodyB;
     }
 
     public PVector getNormal() {
-        return normal;
+        return Normal;
     }
 
     public float getDepth() {
-        return depth;
+        return Depth;
     }
 
     public PVector[] getPointsOfContact() {
-        return pointsOfContact;
+        return PointsOfContact;
     }
 
     public int getContactCount() {
-        return contactCount;
+        return ContactCount;
     }
 
 

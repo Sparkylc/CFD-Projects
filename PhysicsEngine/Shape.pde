@@ -7,9 +7,10 @@ public class Shape {
     background(BACKGROUND_COLOUR.x, BACKGROUND_COLOUR.y, BACKGROUND_COLOUR.z);
     drawRigidbodies();
     drawAABB();
-  /*---------------------------------Collision Point Debugging--------------------------------------
+  /*---------------------------------Collision Point Debugging--------------------------------------*/
     drawCollisionPoints();
-  -----------------------------------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------------------------------*/
+  drawForces();
   }
 
 /*
@@ -91,19 +92,29 @@ public class Shape {
       }
     }
   }
-/*---------------------------------Collision Point Debugging--------------------------------------
+
+/*-----------------------------------------------------------------------------------------------*/
+public void drawForces() {
+    for(Rigidbody rigidbody : rigidbodyList) {
+        for(ForceRegistry force : rigidbody.getForceRegistry()) {
+            force.draw();
+        }
+    }
+}
+/*---------------------------------Collision Point Debugging--------------------------------------*/
   public void drawCollisionPoints() {
-    if(showCollisionPoints) {
-      for(PVector point : pointsOfContact) {
+      for(PVector point : pointsOfContactList) {
         stroke(0, 0, 0);
         strokeWeight(0.1f);
         noFill();
         rectMode(CENTER);
         rect(point.x, point.y, 1, 1);
       }
+        pointsOfContactList.clear();
     }
-  }
------------------------------------------------------------------------------------------------*/
+
+  
+/*-----------------------------------------------------------------------------------------------*/
 
 
 }

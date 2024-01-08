@@ -107,7 +107,7 @@ public void mouseClicked() {
                                                               0.05, new PVector(0, 0, 0),
                                                               new PVector(255, 255, 255));
     rigidbody.SetInitialPosition(interactivityListener.screenToWorld(mouseX, mouseY));
-    rigidbody.setAngularVelocity(random(-0.5f, 0.5f));
+    //rigidbody.setAngularVelocity(random(-0.5f, 0.5f));
 
     
     rigidbody.addForceToForceRegistry(new Gravity());

@@ -23,7 +23,7 @@ float displayTimeStep;
 
 /*----------------------------------------------------------------------------------------------*/
 
-
+public static ArrayList<PVector> pointsOfContactList = new ArrayList<PVector>();
 
 
 /*
@@ -44,6 +44,8 @@ public PVector[] contactList = new PVector[0];
 public PVector[] impulseList = new PVector[2];
 public PVector[] raList = new PVector[2];
 public PVector[] rbList = new PVector[2];
+public PVector[] frictionImpulseList = new PVector[2];
+public float[] jList = new float[2];
    
 
 
@@ -162,6 +164,7 @@ public void ResolveCollisionLinear(CollisionManifold collisionManifold) {
 }
 
 public void ResolveCollisionRotation(CollisionManifold contact) {
+
     Rigidbody rigidbodyA = contact.getRigidbodyA();
     Rigidbody rigidbodyB = contact.getRigidbodyB();
     float invMassA = rigidbodyA.getInvMass();
@@ -243,6 +246,171 @@ public void ResolveCollisionRotation(CollisionManifold contact) {
         rigidbodyB.setAngularVelocity(angularVelocityB);
     }
 }
+
+public void ResolveCollisionRotationAndFriction(CollisionManifold contact) {
+
+    Rigidbody rigidbodyA = contact.getRigidbodyA();
+    Rigidbody rigidbodyB = contact.getRigidbodyB();
+
+    float invMassA = rigidbodyA.getInvMass();
+    float invMassB = rigidbodyB.getInvMass();
+
+    float invRotationalInertiaA = rigidbodyA.getInvRotationalInertia();
+    float invRotationalInertiaB = rigidbodyB.getInvRotationalInertia();
+
+    PVector positionA = rigidbodyA.getPosition();
+    PVector positionB = rigidbodyB.getPosition();
+
+    PVector velocityA = rigidbodyA.getVelocity();
+    PVector velocityB = rigidbodyB.getVelocity();
+
+    float angularVelocityA = rigidbodyA.getAngularVelocity();
+    float angularVelocityB = rigidbodyB.getAngularVelocity();
+
+    PVector normal = contact.getNormal();
+    int contactCount = contact.getContactCount();
+    contactList = contact.getPointsOfContact();
+
+
+
+    float restitution = min(rigidbodyA.getRestitution(), rigidbodyB.getRestitution());
+
+    float coefficientOfStaticFriction = (rigidbodyA.getCoefficientOfStaticFriction()
+                                        + rigidbodyB.getCoefficientOfStaticFriction()) * 0.5f;
+    float coefficientOfKineticFriction = (rigidbodyA.getCoefficientOfKineticFriction()
+                                         + rigidbodyB.getCoefficientOfKineticFriction()) * 0.5f;
+    
+    for(int i = 0; i < contactCount; i++) {
+        this.impulseList[i] = new PVector();
+        this.raList[i] = new PVector();
+        this.rbList[i] = new PVector();
+        this.frictionImpulseList[i] = new PVector();
+        this.jList[i] = 0f;
+    }
+
+    for(int i = 0; i < contactCount; i++) {
+
+        PVector ra = PVector.sub(contactList[i], positionA);
+        PVector rb = PVector.sub(contactList[i], positionB);
+
+        raList[i] = ra;
+        rbList[i] = rb;
+
+        PVector raPerp = new PVector(-ra.y, ra.x);
+        PVector rbPerp = new PVector(-rb.y, rb.x);
+
+        PVector angularLinearVelocityA = PVector.mult(raPerp, angularVelocityA);
+        PVector angularLinearVelocityB = PVector.mult(rbPerp, angularVelocityB);
+
+        PVector relativeVelocity = PVector.sub(PVector.add(velocityB, angularLinearVelocityB),
+                                               PVector.add(velocityA, angularLinearVelocityA));
+
+        float contactVelocityMagnitude = relativeVelocity.dot(normal);
+        
+        if(contactVelocityMagnitude > 0f) {
+            continue;
+        }
+        
+        float raPerpendicularDotN = raPerp.dot(normal);
+        float rbPerpendicularDotN = rbPerp.dot(normal);
+
+        float denom = invMassA + invMassB
+                    + (raPerpendicularDotN * raPerpendicularDotN) * invRotationalInertiaA
+                    + (rbPerpendicularDotN * rbPerpendicularDotN) * invRotationalInertiaB;
+
+        float j = -(1f + restitution) * contactVelocityMagnitude;
+        j /= denom;
+        j /= (float)contactCount;
+
+        jList[i] = j;
+
+        PVector impulse = PVector.mult(normal, j);
+        impulseList[i] = impulse;
+    }
+
+    for(int i = 0; i < contactCount; i++) {
+
+        PVector impulse = impulseList[i];
+        PVector ra = raList[i];
+        PVector rb = rbList[i];
+
+        velocityA.add(PVector.mult(impulse, -invMassA));
+        velocityB.add(PVector.mult(impulse, invMassB));
+
+        angularVelocityA += -ra.cross(impulse).z * invRotationalInertiaA;
+        angularVelocityB += rb.cross(impulse).z * invRotationalInertiaB;
+
+    }
+
+    for(int i = 0; i < contactCount; i++) {
+        PVector ra = PVector.sub(contactList[i], positionA);
+        PVector rb = PVector.sub(contactList[i], positionB);
+
+        raList[i] = ra;
+        rbList[i] = rb;
+
+        PVector raPerp = new PVector(-ra.y, ra.x);
+        PVector rbPerp = new PVector(-rb.y, rb.x);
+
+        PVector angularLinearVelocityA = PVector.mult(raPerp, angularVelocityA);
+        PVector angularLinearVelocityB = PVector.mult(rbPerp, angularVelocityB);
+
+        PVector relativeVelocity = PVector.sub(PVector.add(velocityB, angularLinearVelocityB),
+                                               PVector.add(velocityA, angularLinearVelocityA));
+        PVector tangent = PVector.sub(relativeVelocity, PVector.mult(normal, relativeVelocity.dot(normal)));
+
+        if(PhysEngMath.Equals(tangent, new PVector())) {
+
+            continue;
+
+        } else {
+
+            tangent.normalize();
+
+        }
+
+        float raPerpDotT = raPerp.dot(tangent);
+        float rbPerpDotT = rb.dot(tangent);
+
+        float denom = invMassA + invMassB
+                    + (raPerpDotT * raPerpDotT) * invRotationalInertiaA
+                    + (rbPerpDotT * rbPerpDotT) * invRotationalInertiaB;
+
+        float jt = -relativeVelocity.dot(tangent);
+        jt /= denom;
+        jt /= (float)contactCount;
+
+        PVector frictionImpulse;
+        float j = jList[i];
+
+        if(abs(jt) <= j * coefficientOfStaticFriction) {
+            frictionImpulse = PVector.mult(tangent, jt);
+        } else {
+            frictionImpulse = PVector.mult(tangent, -j * coefficientOfKineticFriction);
+        }
+        
+        this.frictionImpulseList[i] = frictionImpulse;
+    }
+        for(int i = 0; i < contactCount; i++) {
+            PVector frictionImpulse = frictionImpulseList[i];
+            PVector ra = raList[i];
+            PVector rb = rbList[i];
+
+            velocityA.add(PVector.mult(frictionImpulse, -invMassA));
+            velocityB.add(PVector.mult(frictionImpulse, invMassB));
+
+            angularVelocityA += -ra.cross(frictionImpulse).z * invRotationalInertiaA;
+            angularVelocityB += rb.cross(frictionImpulse).z * invRotationalInertiaB;
+
+            rigidbodyA.setVelocity(velocityA);
+            rigidbodyB.setVelocity(velocityB);
+
+            rigidbodyA.setAngularVelocity(angularVelocityA);
+            rigidbodyB.setAngularVelocity(angularVelocityB);
+        }
+
+    }
+
 /*
 ==================================================================================================
 ============================ Broad & Narrow - Phase Collision Methods ============================
@@ -283,6 +451,7 @@ public void NarrowPhaseStep() {
     for (int i = 0; i < collisionPairs.size(); i++)
     {
         ArrayList<Integer> pair = collisionPairs.get(i);
+
         Rigidbody rigidbodyA = rigidbodyList.get(pair.get(0));
         Rigidbody rigidbodyB = rigidbodyList.get(pair.get(1));
         
@@ -295,7 +464,7 @@ public void NarrowPhaseStep() {
             SeperateBodies(rigidbodyA, rigidbodyB, minimumTranslationVector);
             Collisions.FindCollisionPoints(rigidbodyA, rigidbodyB, collisionResult);
             CollisionManifold collisionManifold = new CollisionManifold(rigidbodyA, rigidbodyB, collisionResult);
-            this.ResolveCollisionRotation(collisionManifold);
+            this.ResolveCollisionRotationAndFriction(collisionManifold);
                 
         }
     }
@@ -316,6 +485,8 @@ public void StepBodies(float dt, int totalIterations) {
 public void AddBodyToBodyEntityList(Rigidbody body) {
     rigidbodyList.add(body);
 }
+
+
     
 public void RemoveBodyFromBodyEntityList(Rigidbody body) {
      rigidbodyList.remove(body);

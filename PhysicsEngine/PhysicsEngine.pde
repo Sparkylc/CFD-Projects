@@ -18,6 +18,7 @@ void setup() {
                                                    2f, 0.1f, 0.1f, true, true,
                                                    true, 0.05, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
+
   floor.SetInitialPosition(new PVector(0, 0));
 
   Rigidbody slantedFloor1 = RigidbodyGenerator.CreateBoxBody(30f,
@@ -31,13 +32,20 @@ void setup() {
                                                    true, 0.05, new PVector(0, 0, 0),
                                                    new PVector(255, 255, 255));
   slantedFloor2.SetInitialPosition(new PVector(20, -20));
-  
   slantedFloor1.Rotate(PI/6);
   slantedFloor2.Rotate(-PI/6);
+
+    Rigidbody box = RigidbodyGenerator.CreateBoxBody(1f,
+                                                     1f, 0.1f, 0.1f, false, true,
+                                                     true, 0.05, new PVector(0, 0, 0),
+                                                     new PVector(255, 255, 255));
+    box.addForceToForceRegistry(new Gravity());
+    box.addForceToForceRegistry(new Spring(box));
 
   AddBodyToBodyEntityList(slantedFloor1);
   AddBodyToBodyEntityList(slantedFloor2);
   AddBodyToBodyEntityList(floor);
+  AddBodyToBodyEntityList(box);
 }
 
 

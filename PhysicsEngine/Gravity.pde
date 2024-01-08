@@ -12,4 +12,8 @@ public class Gravity implements ForceRegistry {
   public void draw() {
     // do nothing
   }
+@Override
+ public PVector getApplicationPoint() {
+    return rigidbody.getPosition().copy();
+ }
 }

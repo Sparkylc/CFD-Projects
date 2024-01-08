@@ -18,11 +18,14 @@ public class Rigidbody {
   private float Radius;
   private float Width;
   private float Height;
+  private float coefficientOfStaticFriction;
+  private float coefficientOfKineticFriction;
   
 
   private PVector[] Vertices;
   private AABB aabb;
   private PVector[] transformedVertices;
+
 
 
   private Shape shapeRenderer;
@@ -80,6 +83,9 @@ public class Rigidbody {
     this.Radius = radius;
     this.Width = width;
     this.Height = height;
+
+    this.coefficientOfStaticFriction = 0.8f;
+    this.coefficientOfKineticFriction = 0.3f;
   
 
     this.ShapeType = shapeType;
@@ -378,15 +384,11 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
       this.aabbUpdateRequired = false;
       return;
     } else {
-      this.aabbUpdateRequired = true;  
+      this.aabbUpdateRequired = true;
       this.transformUpdateRequired = true;
-      this.angle += this.angularVelocity * dt;
       dt /= (float)iterations;
       this.RK4Position(dt);
-      
-
-
-        
+      this.angularIntegration(dt);
     }
   }
   
@@ -427,8 +429,12 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
     this.transformUpdateRequired = true;
   }
   
-  //TODO: Implement RK4 ACCELERATION FUNCTION FOR ANGULAR ACCELL AND NORMAL ACELL
-  
+  public void angularIntegration(float dt) {
+    //float angularAcceleration = calculateAngularAcceleration();
+    //this.angularVelocity += angularAcceleration*dt;
+    this.angle += this.angularVelocity*dt;
+  }
+
   public PVector calculateAcceleration(PVector position) {
     
     PVector netForce = new PVector();
@@ -436,9 +442,9 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
       netForce.add(force.getForce(this, position));
     }
     return PVector.div(netForce, this.Mass);
-    
- 
   }
+
+
   
   /*
   ==================================================================================================
@@ -632,5 +638,21 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
     this.angularVelocity = angularVelocity;
   }
 
-  
+
+public float getCoefficientOfKineticFriction() {
+    return this.coefficientOfKineticFriction;
+}
+
+public void setCoefficientOfKineticFriction(float coefficientOfKineticFriction) {
+    this.coefficientOfKineticFriction = coefficientOfKineticFriction;
+}
+
+public float getCoefficientOfStaticFriction() {
+    return this.coefficientOfStaticFriction;
+}
+
+public void setCoefficientOfStaticFriction(float coefficientOfStaticFriction) {
+    this.coefficientOfStaticFriction = coefficientOfStaticFriction;
+}
+
 }

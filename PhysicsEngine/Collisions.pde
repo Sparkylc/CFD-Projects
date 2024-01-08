@@ -22,14 +22,14 @@ public static CollisionResult Collide(Rigidbody rigidbodyA, Rigidbody rigidbodyB
       if(shapeTypeB == ShapeType.BOX) {
 
         return IntersectPolygon(rigidbodyA.getPosition(),
-                                           rigidbodyA.GetTransformedVertices(), 
+                                           rigidbodyA.GetTransformedVertices(),
                                            rigidbodyB.getPosition(),
                                            rigidbodyB.GetTransformedVertices());
 
       } else if(shapeTypeB == ShapeType.CIRCLE) {
-        CollisionResult result = Collisions.IntersectCirclePolygon(rigidbodyB.getPosition(), 
-                                                                   rigidbodyB.getRadius(), 
-                                                                   rigidbodyA.getPosition(), 
+        CollisionResult result = Collisions.IntersectCirclePolygon(rigidbodyB.getPosition(),
+                                                                   rigidbodyB.getRadius(),
+                                                                   rigidbodyA.getPosition(),
                                                                    rigidbodyA.GetTransformedVertices()
                                                                    );
         
@@ -68,9 +68,8 @@ public static CollisionResult Collide(Rigidbody rigidbodyA, Rigidbody rigidbodyB
 //ACCEPTING AN INPUT COLLISIONRESULT AND CHANGING IT
 
 
-public static void FindCollisionPoints(Rigidbody rigidbodyA, Rigidbody rigidbodyB, 
+public static void FindCollisionPoints(Rigidbody rigidbodyA, Rigidbody rigidbodyB,
                                                   CollisionResult collisionResult) {
-
 
 
     PVector[] pointsOfContact = new PVector[0];
@@ -82,15 +81,17 @@ public static void FindCollisionPoints(Rigidbody rigidbodyA, Rigidbody rigidbody
 if(shapeTypeA == ShapeType.BOX) {
 
       if(shapeTypeB == ShapeType.BOX) {
-        pointsOfContact = FindPolygonsCollisionPoints(rigidbodyA.GetTransformedVertices(), 
+        pointsOfContact = FindPolygonsCollisionPoints(rigidbodyA.GetTransformedVertices(),
                                                       rigidbodyB.GetTransformedVertices());
+        contactCount = pointsOfContact.length;
 
       } else if(shapeTypeB == ShapeType.CIRCLE) {
 
           pointsOfContact = FindCirclePolygonCollisionPoint(rigidbodyB.getPosition(),
                                                             rigidbodyB.getRadius(),
-                                                            rigidbodyA.getPosition(), 
+                                                            rigidbodyA.getPosition(),
                                                             rigidbodyA.GetTransformedVertices());
+        contactCount = 1;
       }
 
     }
@@ -98,24 +99,29 @@ if(shapeTypeA == ShapeType.BOX) {
         
         if(shapeTypeB == ShapeType.BOX) {
           
-          pointsOfContact = FindCirclePolygonCollisionPoint(rigidbodyA.getPosition(), 
+          pointsOfContact = FindCirclePolygonCollisionPoint(rigidbodyA.getPosition(),
                                                             rigidbodyA.getRadius(),
-                                                            rigidbodyB.getPosition(), 
+                                                            rigidbodyB.getPosition(),
                                                             rigidbodyB.GetTransformedVertices());
+            contactCount = 1;
 
 
         } else if(shapeTypeB == ShapeType.CIRCLE) {
 
-          pointsOfContact = FindCirclesCollisionPoint(rigidbodyA.getPosition(),  
-                                                      rigidbodyA.getRadius(), 
+          pointsOfContact = FindCirclesCollisionPoint(rigidbodyA.getPosition(),
+                                                      rigidbodyA.getRadius(),
                                                       rigidbodyB.getPosition(),
                                                       rigidbodyB.getRadius());
+            contactCount = 1;
         }
       }
 
+   for(PVector point : pointsOfContact) {
+        pointsOfContactList.add(point);
+   }
 
   collisionResult.setPointsOfContact(pointsOfContact);
-  collisionResult.setContactCount(pointsOfContact.length);
+  collisionResult.setContactCount(contactCount);
 }
 /*
 ====================================================================================================
@@ -123,7 +129,7 @@ if(shapeTypeA == ShapeType.BOX) {
 ======================================= COLLISION-RESULT ===========================================
 ====================================================================================================
 */
- private static PVector[] FindCirclesCollisionPoint(PVector centerA, float radiusA, 
+ private static PVector[] FindCirclesCollisionPoint(PVector centerA, float radiusA,
                                                          PVector centerB, float radiusB) {
 
     PVector direction = PVector.sub(centerB, centerA).normalize();
@@ -136,10 +142,10 @@ if(shapeTypeA == ShapeType.BOX) {
 ======================================= COLLISION-RESULT ===========================================
 ====================================================================================================
 */
-private static PVector[] FindPolygonsCollisionPoints(PVector[] transformedVerticesA, 
+private static PVector[] FindPolygonsCollisionPoints(PVector[] transformedVerticesA,
                                                            PVector[] transformedVerticesB) {
   
-  PVector[] pointsOfContact = new PVector[0];
+  //PVector[] pointsOfContact = new PVector[0];
   PVector contactPointA = new PVector();
   PVector contactPointB = new PVector();
   int contactCount = 0;
@@ -172,7 +178,7 @@ private static PVector[] FindPolygonsCollisionPoints(PVector[] transformedVertic
             contactCount = 1;
         }
       }
-    } 
+    }
 
   for(int i = 0; i < transformedVerticesB.length; i++) {
 
@@ -201,6 +207,10 @@ private static PVector[] FindPolygonsCollisionPoints(PVector[] transformedVertic
         }
       }
     }
+
+    if(contactCount == 1){
+      return new PVector[] {contactPointA};
+    }
   return new PVector[] {contactPointA, contactPointB};
   
 }
@@ -212,9 +222,9 @@ private static PVector[] FindPolygonsCollisionPoints(PVector[] transformedVertic
 ====================================================================================================
 */
 
-private static PVector[] FindCirclePolygonCollisionPoint(PVector circleCenter, 
+private static PVector[] FindCirclePolygonCollisionPoint(PVector circleCenter,
                                                          float circleRadius,
-                                                         PVector polygonCenter, 
+                                                         PVector polygonCenter,
                                                          PVector[] transformedVertices) {
 
     float minDistanceSquared = Float.MAX_VALUE;
@@ -258,7 +268,7 @@ public static boolean IntersectAABB (AABB aabbA, AABB aabbB) {
 ======================================= COLLISION-RESULT ===========================================
 ====================================================================================================
 */
-  public static CollisionResult IntersectCircle(PVector centerA, PVector centerB, 
+  public static CollisionResult IntersectCircle(PVector centerA, PVector centerB,
                                                 float radiusA, float radiusB) {
 
     boolean isColliding;
@@ -296,7 +306,7 @@ public static CollisionResult IntersectPolygon(PVector centerA,
                                                PVector centerB,
                                                PVector[] transformedVerticesB) {
 
-    boolean isColliding;              
+    boolean isColliding;
     float depth = Float.MAX_VALUE;
     PVector normal = new PVector();
 
@@ -307,7 +317,7 @@ public static CollisionResult IntersectPolygon(PVector centerA,
       PVector transformedVertexA = transformedVerticesA[vertexIndexA];
       PVector transformedVertexB = transformedVerticesA[(vertexIndexA + 1) % transformedVerticesA.length];
 
-      //Finds the edge between the two vertices, 
+      //Finds the edge between the two vertices,
       PVector edge = PVector.sub(transformedVertexB, transformedVertexA);
 
       //Finds the normal or "axis" from the edge vector
@@ -389,10 +399,10 @@ public static CollisionResult IntersectPolygon(PVector centerA,
 */
 
 
-public static CollisionResult IntersectCirclePolygon(PVector circleCenter, float circleRadius, 
-                                                     PVector polygonCenter, 
+public static CollisionResult IntersectCirclePolygon(PVector circleCenter, float circleRadius,
+                                                     PVector polygonCenter,
                                                      PVector[] transformedVertices){
-    boolean isColliding;              
+    boolean isColliding;
     float depth = Float.MAX_VALUE;
     PVector normal = new PVector();
 

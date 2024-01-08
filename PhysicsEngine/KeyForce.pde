@@ -1,7 +1,9 @@
 
 public class KeyForce implements ForceRegistry {
-  @Override 
+    private Rigidbody rigidbody;
+  @Override
   public PVector getForce(Rigidbody rigidbody, PVector position) {
+    this.rigidbody = rigidbody;
     PVector force = new PVector(0, 0);
 
     if (keyPressed) {
@@ -24,4 +26,8 @@ public class KeyForce implements ForceRegistry {
   public void draw() {
     // do nothing
   }
+  @Override
+public PVector getApplicationPoint() {
+    return rigidbody.getPosition().copy();
+ }
 }
