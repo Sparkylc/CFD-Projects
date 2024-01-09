@@ -40,37 +40,40 @@ void setup() {
                                                      true, 0.05, new PVector(0, 0, 0),
                                                      new PVector(255, 255, 255));
     box.addForceToForceRegistry(new Gravity());
-    box.addForceToForceRegistry(new Spring(box));
+    box.addForceToForceRegistry(new Spring(box, new PVector(0,0), new PVector(-10, -20)));
 
 
 
-  Rigidbody rigidbodyJoint1 = RigidbodyGenerator.CreateBoxBody(1f,
-                                                     1f, 1f, 1f, false, true,
-                                                     true, 0.05, new PVector(0, 0, 0),
-                                                     new PVector(255, 255, 255));
-  Rigidbody anchorRigidbodyJoint = RigidbodyGenerator.CreateBoxBody(1f,
-                                                     1f, 1f, 1f, false, true,
-                                                     true, 0.05, new PVector(0, 0, 0),
-                                                     new PVector(255, 255, 255));
+    Rigidbody rigidbodyA = RigidbodyGenerator.CreateBoxBody(1f,
+                                                                 1f, 1f, 1f, false, true,
+                                                                 true, 0.05, new PVector(0, 0, 0),
+                                                                 new PVector(255, 255, 255));
+    Rigidbody rigidbodyB = RigidbodyGenerator.CreateBoxBody(1f,
+                                                                      1f, 1f, 1f, false, true,
+                                                                      true, 0.05, new PVector(0, 0, 0),
+                                                                      new PVector(255, 255, 255));
 
-    rigidbodyJoint1.SetInitialPosition(new PVector(0, -11));
-    anchorRigidbodyJoint.SetInitialPosition(new PVector(0, -10));
+    rigidbodyA.SetInitialPosition(new PVector(0, -11));
+    rigidbodyB.SetInitialPosition(new PVector(0, -10));
 
-    RigidJoint rigidjoint1 = new RigidJoint(rigidbodyJoint1, anchorRigidbodyJoint, new PVector(0.2, 0),
-                                            new PVector(0, 0), 1, 1);
-    RigidJoint rigidjoint2 = new RigidJoint(anchorRigidbodyJoint, rigidbodyJoint1, new PVector(0.2, 0),
-                                            new PVector(0, 0), 1, 1);
-rigidbodyJoint1.addForceToForceRegistry(new Gravity());
-rigidbodyJoint1.addForceToForceRegistry(rigidjoint1);
-anchorRigidbodyJoint.addForceToForceRegistry(new Gravity());
-anchorRigidbodyJoint.addForceToForceRegistry(rigidjoint2);
 
-  AddBodyToBodyEntityList(rigidbodyJoint1);
-    AddBodyToBodyEntityList(anchorRigidbodyJoint);
-  AddBodyToBodyEntityList(slantedFloor1);
-  AddBodyToBodyEntityList(slantedFloor2);
-  AddBodyToBodyEntityList(floor);
-  AddBodyToBodyEntityList(box);
+    Rod rigidRodA = new Rod(rigidbodyA, rigidbodyB, new PVector(1, 0),
+                                            new PVector(0, 0));
+    Rod rigidRodB = new Rod(rigidbodyB, rigidbodyA, new PVector(0, 0),
+                                            new PVector(1, 0));
+
+
+    rigidbodyA.addForceToForceRegistry(new Gravity());
+    rigidbodyA.addForceToForceRegistry(rigidRodA);
+    rigidbodyB.addForceToForceRegistry(new Gravity());
+    rigidbodyB.addForceToForceRegistry(rigidRodB);
+
+    AddBodyToBodyEntityList(rigidbodyA);
+    AddBodyToBodyEntityList(rigidbodyB);
+    AddBodyToBodyEntityList(slantedFloor1);
+    AddBodyToBodyEntityList(slantedFloor2);
+    AddBodyToBodyEntityList(floor);
+    AddBodyToBodyEntityList(box);
 }
 
 

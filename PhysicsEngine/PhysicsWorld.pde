@@ -164,7 +164,7 @@ public void ResolveCollisionLinear(CollisionManifold collisionManifold) {
 }
 
 public void ResolveCollisionRotation(CollisionManifold contact) {
-
+    
     Rigidbody rigidbodyA = contact.getRigidbodyA();
     Rigidbody rigidbodyB = contact.getRigidbodyB();
     float invMassA = rigidbodyA.getInvMass();
@@ -246,6 +246,7 @@ public void ResolveCollisionRotation(CollisionManifold contact) {
         rigidbodyB.setAngularVelocity(angularVelocityB);
     }
 }
+
 
 public void ResolveCollisionRotationAndFriction(CollisionManifold contact) {
 
@@ -458,13 +459,14 @@ public void NarrowPhaseStep() {
         CollisionResult collisionResult = Collisions.Collide(rigidbodyA, rigidbodyB);
             
         if (collisionResult.getIsColliding()) {
-                
+            
             PVector minimumTranslationVector = PVector.mult(collisionResult.getNormal(), collisionResult.getDepth());
             
             SeperateBodies(rigidbodyA, rigidbodyB, minimumTranslationVector);
             Collisions.FindCollisionPoints(rigidbodyA, rigidbodyB, collisionResult);
             CollisionManifold collisionManifold = new CollisionManifold(rigidbodyA, rigidbodyB, collisionResult);
             this.ResolveCollisionRotationAndFriction(collisionManifold);
+
                 
         }
     }
@@ -565,6 +567,7 @@ text("FPS: " + fps, 10, 80);
 text("dt: " + displayTimeStep, 10, 100);
 /*------------------------------------------------------------------------------------------------*/
 }
-             
+
+    
                                         
                                         

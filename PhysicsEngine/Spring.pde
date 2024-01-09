@@ -1,29 +1,75 @@
 public class Spring implements ForceRegistry {
 
-  private Rigidbody rigidbody;
-  private PVector anchorPoint = new PVector(0,0);
-  private Rigidbody springRigidbody;
+  private Rigidbody rigidbodyA;
+  private Rigidbody rigidbodyB;
+
+  private PVector anchorPoint;
+  private PVector localAnchorA;
+  private PVector localAnchorB;
 
   private float equilibriumLength = 0.5f; //Equilibrium length is a percentage of the total magnitude of the length, which for now will be 0.5f percent
-  private float springLength = 10;
+  private float springLength = 1;
   private float springConstant = 5;
-  private boolean isConnectedToSpring = false;
 
- public Spring(Rigidbody rigidbody) {
-    this.rigidbody = rigidbody;
+  private boolean isHingeable;
+  private boolean isTwoBodySpring;
+
+  private float initialRotationA;
+  private float initialRotationB;
+
+
+
+public Spring(Rigidbody rigidbody, PVector localAnchorA, PVector anchorPoint) {
+
+    this.rigidbodyA = rigidbody;
+    this.localAnchorA = localAnchorA;
+    this.anchorPoint = anchorPoint;
+    this.isTwoBodySpring = false;
+    this.isHingeable = false;
+}
+
+ public Spring(Rigidbody rigidbodyA, Rigidbody rigidbodyB, PVector localAnchorA, PVector localAnchorB) {
+
+    this.rigidbodyA = rigidbodyA;
+    this.rigidbodyB = rigidbodyB;
+
+    this.localAnchorA = localAnchorA;
+    this.localAnchorB = localAnchorB;
+
+    this.isTwoBodySpring = true;
+    this.isHingeable = false;
  }
+
   @Override
   public PVector getForce(Rigidbody rigidbody, PVector position) {
 
-    if(isConnectedToSpring) {
-      anchorPoint = springRigidbody.getPosition();
+    PVector direction;
+    PVector worldAnchorA;
+    PVector worldAnchorB;
+
+    if(isTwoBodySpring) {
+        worldAnchorA = PhysEngMath.Transform(localAnchorA, position, rigidbodyA.getAngle());
+        worldAnchorB = PhysEngMath.Transform(localAnchorB, rigidbodyB.getPosition(), rigidbodyB.getAngle());
+        direction = PVector.sub(worldAnchorB, worldAnchorA);
+    } else {
+        worldAnchorA = PhysEngMath.Transform(localAnchorA, position, rigidbodyA.getAngle());
+        worldAnchorB = anchorPoint;
+        direction = PVector.sub(worldAnchorB, worldAnchorA);
     }
-    PVector direction = PVector.sub(position, anchorPoint);
+
+    if(!this.isHingeable) {
+        float rodAngle = PApplet.atan2(direction.y, direction.x);
+        float angleDifference = rigidbodyA.getAngle() - rodAngle;
+        rigidbodyA.setAngle(rigidbodyA.getAngle() - angleDifference);
+    }
+
     float currentLength = direction.mag();
-    equilibriumLength = springLength * 0.5f;
-    float displacement = currentLength - equilibriumLength;
     direction.normalize();
-    return PVector.mult(direction, -springConstant * displacement);
+
+    float equilibrium = springLength * equilibriumLength;
+    float displacement = currentLength - equilibriumLength;
+
+    return PVector.mult(direction, springConstant * displacement);
   }
   
 
@@ -31,12 +77,21 @@ public class Spring implements ForceRegistry {
 //WILL HAVE THICKER LINES, AND MORE OFFSET, ETC
   @Override
   public void draw() {
+    PVector anchorA;
+    PVector anchorB;
 
-  ellipseMode(CENTER);
+  if(isTwoBodySpring) {
+    anchorA = PhysEngMath.Transform(localAnchorA, rigidbodyA.getPosition(), rigidbodyA.getAngle());
+    anchorB = PhysEngMath.Transform(localAnchorB, rigidbodyB.getPosition(), rigidbodyB.getAngle());
+  } else {
+
+    anchorA = PhysEngMath.Transform(localAnchorA, rigidbodyA.getPosition(), rigidbodyA.getAngle());
+    anchorB = anchorPoint;
+  }
+
   fill(255);
-  ellipse(rigidbody.getPosition().x, rigidbody.getPosition().y, 0.1, 0.1);
-  ellipse(anchorPoint.x, anchorPoint.y, 0.1, 0.1);
-  PVector direction = PVector.sub(rigidbody.getPosition().copy(), anchorPoint);
+
+  PVector direction = PVector.sub(anchorA, anchorB);
   float length = direction.mag();
   direction.normalize();
 
@@ -53,14 +108,14 @@ color backColor = color(255, 255, 255); // Light gray
 // Draw the rod
 strokeWeight(0.3);
 stroke(0); // Black
-line(anchorPoint.x, anchorPoint.y, rigidbody.getPosition().x, rigidbody.getPosition().y);
+line(anchorA.x, anchorA.y, anchorB.x, anchorB.y);
 stroke(255); // White
 strokeWeight(0.1);
-line(anchorPoint.x, anchorPoint.y, rigidbody.getPosition().x, rigidbody.getPosition().y);
+line(anchorA.x, anchorA.y, anchorB.x, anchorB.y);
 
 for(int i = 0; i < segments; i++) {
-    PVector segmentStart = PVector.add(anchorPoint, PVector.mult(direction, segmentLength * i));
-    PVector segmentEnd = PVector.add(anchorPoint, PVector.mult(direction, segmentLength * (i + 1)));
+    PVector segmentStart = PVector.add(anchorB, PVector.mult(direction, segmentLength * i));
+    PVector segmentEnd = PVector.add(anchorB, PVector.mult(direction, segmentLength * (i + 1)));
 
     // Calculate the midpoint of the segment
     PVector midPoint = PVector.lerp(segmentStart, segmentEnd, 0.5f);
@@ -101,34 +156,13 @@ for(int i = 0; i < segments; i++) {
 }
 
 @Override
-public PVector getApplicationPoint() {
-    return rigidbody.getPosition().copy();
+public PVector getApplicationPoint(Rigidbody rigidbody, PVector position) {
+    return PhysEngMath.Transform(localAnchorA, position, rigidbody.getAngle());
+    }
+
+public void setIsHingeable(boolean isHingeable) {
+    this.isHingeable = isHingeable;
+}
  }
 
 
-  public void setSpringConstant(float springConstant) {
-    this.springConstant = springConstant;
-  }
-
-  public void setSpringAnchor(PVector anchorPoint) {
-    this.anchorPoint = anchorPoint;
-  }
-
-  public void setSpringAnchor(Rigidbody rigidbody) {
-    this.anchorPoint = rigidbody.getPosition();
-  }
-
-  public void setSpringLength(float springLength) {
-    this.springLength = springLength;
-  }
-
-  public void setConnectedToSpring(boolean isConnectedToSpring) {
-    this.isConnectedToSpring = isConnectedToSpring;
-  }
-
-  public void setAnchorRigidBody(Rigidbody rigidbody) {
-    this.springRigidbody = rigidbody;
-  }
-
-
-}

@@ -27,7 +27,7 @@ public class KeyForce implements ForceRegistry {
     // do nothing
   }
   @Override
-public PVector getApplicationPoint() {
-    return rigidbody.getPosition().copy();
+public PVector getApplicationPoint(Rigidbody rigidbody, PVector position) {
+    return position.copy();
  }
 }

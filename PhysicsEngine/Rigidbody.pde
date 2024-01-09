@@ -27,6 +27,7 @@ public class Rigidbody {
   private PVector[] transformedVertices;
 
 
+  private ArrayList<Rigidbody> collisionExclusionList = new ArrayList<Rigidbody>();
 
   private Shape shapeRenderer;
   private float strokeWeight;
@@ -429,20 +430,39 @@ this.aabb = new AABB(new PVector(minX, minY), new PVector(maxX, maxY));
     this.transformUpdateRequired = true;
   }
   
+
   public void angularIntegration(float dt) {
-    //float angularAcceleration = calculateAngularAcceleration();
-    //this.angularVelocity += angularAcceleration*dt;
+    float angularAcceleration = calculateAngularAcceleration();
+    this.angularVelocity += angularAcceleration*dt;
     this.angle += this.angularVelocity*dt;
   }
 
-  public PVector calculateAcceleration(PVector position) {
-    
-    PVector netForce = new PVector();
-    for (ForceRegistry force : this.forceRegistry) {
-      netForce.add(force.getForce(this, position));
+
+
+    public PVector calculateAcceleration(PVector position) {
+        PVector netForce = new PVector();
+
+        for (ForceRegistry force : this.forceRegistry) {
+            netForce.add(force.getForce(this, position));
+        }
+        return PVector.div(netForce, this.Mass);
     }
-    return PVector.div(netForce, this.Mass);
-  }
+
+
+    public float calculateAngularAcceleration() {
+
+        float netTorque = 0f;
+
+        for (ForceRegistry force : this.forceRegistry) {
+            PVector currentForce = force.getForce(this, position);
+            PVector pointOfApplication = force.getApplicationPoint(this, position);
+            PVector lever = PVector.sub(pointOfApplication, position);
+            float torque = lever.cross(currentForce).z;
+            netTorque+=torque;
+        }
+
+        return netTorque * InvRotationalInertia;
+    }
 
 
   
@@ -655,4 +675,15 @@ public void setCoefficientOfStaticFriction(float coefficientOfStaticFriction) {
     this.coefficientOfStaticFriction = coefficientOfStaticFriction;
 }
 
+public ArrayList<Rigidbody> getCollisionExclusionList() {
+    return this.collisionExclusionList;
+}
+
+public void AddRigidbodyToCollisionExclusionList(Rigidbody rigidbody) {
+    this.collisionExclusionList.add(rigidbody);
+}
+
+public Rigidbody getRigidbodyInCollisionExclusionList(int index) {
+    return this.collisionExclusionList.get(index);
+}
 }
