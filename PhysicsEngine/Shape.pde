@@ -6,7 +6,7 @@ public class Shape {
   public void draw() {
     background(BACKGROUND_COLOUR.x, BACKGROUND_COLOUR.y, BACKGROUND_COLOUR.z);
     drawRigidbodies();
-    drawAABB();
+    drawAABB(); //DONT REMOVE THIS, IT BREAKS SOMETHING
   /*---------------------------------Collision Point Debugging--------------------------------------*/
     drawCollisionPoints();
   /*-----------------------------------------------------------------------------------------------*/

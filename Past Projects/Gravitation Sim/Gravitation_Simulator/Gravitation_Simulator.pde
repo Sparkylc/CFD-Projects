@@ -3,7 +3,7 @@
 
 void setup() {
     offset = new PVector(width / 2, height / 2);
-    fullScreen();
+    size(1000, 1000);
     frameRate(framesPerSecond);
     userInterface = new ControlP5(this);
     userInterfaceController = new UserInterface(userInterface);

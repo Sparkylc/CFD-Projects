@@ -6,7 +6,7 @@ public class Spring implements ForceRegistry {
 
   private float equilibriumLength = 0.5f; //Equilibrium length is a percentage of the total magnitude of the length, which for now will be 0.5f percent
   private float springLength = 10;
-  private float springConstant = 1;
+  private float springConstant = 5;
   private boolean isConnectedToSpring = false;
 
  public Spring(Rigidbody rigidbody) {
